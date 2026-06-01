@@ -22,13 +22,17 @@ const COLORS: Record<string, string> = {
 
 export function RevenueCompositionChart({
   data,
+  className = "",
 }: {
   data: CompositionItem[];
+  className?: string;
 }) {
   const total = data.reduce((sum, item) => sum + Number(item.amount ?? 0), 0);
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-[220px_1fr]">
+    <div
+      className={`grid grid-cols-1 gap-4 md:grid-cols-[220px_1fr] ${className}`}
+    >
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>

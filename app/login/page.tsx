@@ -93,23 +93,23 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f7fb] text-slate-950 lg:grid lg:grid-cols-[minmax(0,1fr)_520px]">
-      <section className="relative min-h-[300px] overflow-hidden bg-[linear-gradient(120deg,#22477e_0%,#1f5fac_56%,#166bc6_100%)] px-6 py-7 text-white sm:min-h-[360px] sm:px-10 lg:min-h-screen lg:px-[60px] lg:py-[60px]">
+    <main className="min-h-screen bg-[var(--jr-background)] text-slate-950 lg:grid lg:grid-cols-[minmax(0,1fr)_520px]">
+      <section className="relative min-h-[300px] overflow-hidden bg-[linear-gradient(120deg,#050b18_0%,#081226_58%,#0d1f3e_100%)] px-6 py-7 text-white sm:min-h-[360px] sm:px-10 lg:min-h-screen lg:px-[60px] lg:py-[60px]">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -left-[20%] top-[22%] h-[620px] w-[980px] rounded-[50%] border-[3px] border-white/10 sm:-left-[10%] sm:h-[720px] sm:w-[1120px] lg:-left-[9%] lg:top-[23%] lg:h-[760px] lg:w-[1260px]"
+          className="pointer-events-none absolute -left-[20%] top-[22%] h-[620px] w-[980px] rounded-[50%] border-[3px] border-white/8 sm:-left-[10%] sm:h-[720px] sm:w-[1120px] lg:-left-[9%] lg:top-[23%] lg:h-[760px] lg:w-[1260px]"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute left-[10%] top-[58%] h-[480px] w-[760px] rounded-[50%] border-[3px] border-white/10 sm:h-[560px] sm:w-[920px] lg:left-[11%] lg:top-[54%] lg:h-[690px] lg:w-[1080px]"
+          className="pointer-events-none absolute left-[10%] top-[58%] h-[480px] w-[760px] rounded-[50%] border-[3px] border-white/8 sm:h-[560px] sm:w-[920px] lg:left-[11%] lg:top-[54%] lg:h-[690px] lg:w-[1080px]"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute left-[24%] top-[92%] h-[320px] w-[560px] rounded-[50%] border-[3px] border-white/10 lg:left-[24%] lg:top-[86%] lg:h-[420px] lg:w-[700px]"
+          className="pointer-events-none absolute left-[24%] top-[92%] h-[320px] w-[560px] rounded-[50%] border-[3px] border-white/8 lg:left-[24%] lg:top-[86%] lg:h-[420px] lg:w-[700px]"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-[12%] -top-[20%] h-[390px] w-[390px] rounded-full border-[76px] border-white/5 lg:-right-[8%] lg:-top-[17%] lg:h-[470px] lg:w-[470px]"
+          className="pointer-events-none absolute -right-[12%] -top-[20%] h-[390px] w-[390px] rounded-full border-[76px] border-[#1f4fea]/15 lg:-right-[8%] lg:-top-[17%] lg:h-[470px] lg:w-[470px]"
         />
 
         <div className="relative z-10 flex min-h-[246px] flex-col sm:min-h-[306px] lg:min-h-[calc(100vh-120px)]">
@@ -128,7 +128,7 @@ export default function LoginPage() {
               <p className="text-xl font-extrabold leading-none text-white sm:text-[22px]">
                 SAKTI JR Jatim
               </p>
-              <p className="mt-1.5 text-[10px] font-semibold uppercase text-blue-100/80">
+              <p className="mt-1.5 text-[10px] font-semibold uppercase text-slate-300">
                 Jasa Raharja Jawa Timur
               </p>
             </div>
@@ -139,28 +139,28 @@ export default function LoginPage() {
               <h1 className="max-w-[1000px] text-2xl font-extrabold leading-tight text-white sm:text-3xl lg:text-[36px] xl:text-[38px]">
                 Sistem Analitik dan Kendali Terpadu Informasi
               </h1>
-              <p className="mt-2 max-w-[760px] text-base font-semibold leading-tight text-blue-100/80 sm:text-xl lg:text-[24px]">
+              <p className="mt-2 max-w-[760px] text-base font-semibold leading-tight text-slate-300 sm:text-xl lg:text-[24px]">
                 Jasa Raharja Kantor Wilayah Jawa Timur
               </p>
             </div>
           </div>
 
-          <p className="hidden text-xs font-semibold text-blue-100/45 lg:block">
+          <p className="hidden text-xs font-semibold text-slate-500 lg:block">
             Copyright 2026 Jasa Raharja Jawa Timur
           </p>
         </div>
       </section>
 
-      <section className="flex min-h-[calc(100vh-300px)] items-start justify-center px-6 py-12 sm:min-h-[calc(100vh-360px)] lg:min-h-screen lg:items-center lg:px-12 lg:py-12">
+      <section className="flex min-h-[calc(100vh-300px)] items-start justify-center border-[#dce3ed] bg-[#f8fafc] px-6 py-12 sm:min-h-[calc(100vh-360px)] lg:min-h-screen lg:items-center lg:border-l lg:px-12 lg:py-12">
         <div className="w-full max-w-[380px]">
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-blue-600">
+            <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#1f4fea]">
               Selamat Datang
             </p>
             <h2 className="mt-3 text-[28px] font-extrabold leading-tight text-slate-950">
               Masuk ke Akun Anda
             </h2>
-            <div className="mt-3 h-[2px] w-9 rounded-full bg-blue-600" />
+            <div className="mt-3 h-[2px] w-9 rounded-full bg-[#1f4fea]" />
             <p className="mt-4 text-sm leading-6 text-slate-500">
               Gunakan kredensial Anda untuk mengakses dashboard SAKTI JR Jatim.
             </p>
@@ -181,7 +181,7 @@ export default function LoginPage() {
               >
                 Username
               </label>
-              <div className="mt-2 flex h-[46px] items-center gap-3 rounded-[7px] border border-[#dce3ed] bg-white px-4 shadow-[0_2px_6px_rgba(15,23,42,0.12)] transition focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
+              <div className="mt-2 flex h-[46px] items-center gap-3 rounded-[7px] border border-[var(--jr-border)] bg-white px-4 shadow-[0_2px_6px_rgba(15,23,42,0.1)] transition focus-within:border-[var(--jr-blue)] focus-within:ring-2 focus-within:ring-[rgba(31,79,234,0.12)]">
                 <User size={17} className="shrink-0 text-[#8aa0bf]" />
                 <input
                   id="email"
@@ -203,7 +203,7 @@ export default function LoginPage() {
               >
                 Kata Sandi
               </label>
-              <div className="mt-2 flex h-[46px] items-center gap-3 rounded-[7px] border border-[#dce3ed] bg-white px-4 shadow-[0_2px_6px_rgba(15,23,42,0.12)] transition focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
+              <div className="mt-2 flex h-[46px] items-center gap-3 rounded-[7px] border border-[var(--jr-border)] bg-white px-4 shadow-[0_2px_6px_rgba(15,23,42,0.1)] transition focus-within:border-[var(--jr-blue)] focus-within:ring-2 focus-within:ring-[rgba(31,79,234,0.12)]">
                 <Lock size={17} className="shrink-0 text-[#8aa0bf]" />
                 <input
                   id="password"
@@ -242,14 +242,14 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(event) => setRememberMe(event.target.checked)}
-                  className="h-3.5 w-3.5 shrink-0 rounded-[2px] border-slate-400 text-blue-600 focus:ring-blue-500"
+                  className="h-3.5 w-3.5 shrink-0 rounded-[2px] border-slate-400 text-[#1f4fea] focus:ring-[#1f4fea]"
                 />
                 <span>Ingat saya</span>
               </label>
 
               <button
                 type="button"
-                className="shrink-0 font-medium text-blue-600 transition hover:text-blue-700"
+                className="shrink-0 font-medium text-[#1f4fea] transition hover:text-[#1746dd]"
               >
                 Lupa kata sandi?
               </button>
@@ -258,7 +258,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-[7px] bg-[#1f4fea] px-4 text-sm font-semibold text-white shadow-[0_10px_18px_rgba(30,64,175,0.28)] transition hover:bg-[#1746dd] disabled:cursor-not-allowed disabled:opacity-60"
+              className="jr-button-primary h-11 w-full disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? (
                 <Loader2 size={17} className="animate-spin" />

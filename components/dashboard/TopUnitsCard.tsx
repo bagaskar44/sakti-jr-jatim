@@ -47,11 +47,13 @@ export function TopUnitsCard({
   source,
   year,
   month,
+  className = "",
 }: {
   units: TopUnit[];
   source: string;
   year?: number;
   month?: number;
+  className?: string;
 }) {
   const sortedUnits = [...units]
     .sort((a, b) => getAmountBySource(b, source) - getAmountBySource(a, source))
@@ -63,7 +65,7 @@ export function TopUnitsCard({
   );
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-3 ${className}`}>
       {sortedUnits.map((unit, index) => {
         const amount = getAmountBySource(unit, source);
         const width = `${Math.max((amount / maxValue) * 100, 4)}%`;

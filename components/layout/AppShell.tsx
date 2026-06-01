@@ -5,11 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import {
+  AlertCircle,
   Building2,
+  CalendarDays,
   ChevronRight,
   LayoutDashboard,
   Menu,
   UploadCloud,
+  Users,
   WalletCards,
   X,
 } from "lucide-react";
@@ -31,6 +34,21 @@ const mainMenu = [
     label: "Pendapatan",
     href: "/pendapatan",
     icon: WalletCards,
+  },
+  {
+    label: "Pelayanan",
+    href: "/pelayanan",
+    icon: Users,
+  },
+  {
+    label: "Kecelakaan",
+    href: "/kecelakaan",
+    icon: AlertCircle,
+  },
+  {
+    label: "Kegiatan",
+    href: "/kegiatan",
+    icon: CalendarDays,
   },
 ];
 

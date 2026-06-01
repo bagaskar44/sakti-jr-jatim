@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { FilterBar } from "@/components/dashboard/FilterBar";
-import { InsightList } from "@/components/dashboard/InsightList";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import {
   RevenueMap,
@@ -48,11 +47,6 @@ type UnitRow = {
   iwkbu_total: number;
   iwkl_total: number;
   total_revenue: number;
-};
-
-type WarningItem = {
-  sheet: string;
-  message: string;
 };
 
 type OverviewResponse = {
@@ -107,8 +101,6 @@ export default function OverviewDashboardPage() {
   const [mapUnits, setMapUnits] = useState<RevenueMapUnit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const warnings: WarningItem[] = [];
 
   async function fetchDashboardData(targetYear: number, targetMonth: number) {
     setLoading(true);
@@ -287,13 +279,12 @@ export default function OverviewDashboardPage() {
               />
             </section>
 
-            <SectionCard title="Executive Insight & Alerts">
-              <InsightList overview={overview} warnings={warnings} />
-            </SectionCard>
-
-            <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+            <section className="grid grid-cols-1 items-stretch gap-4 xl:grid-cols-[1.15fr_0.85fr]">
               <SectionCard title="Distribusi Pendapatan">
-                <RevenueCompositionChart data={composition} />
+                <RevenueCompositionChart
+                  data={composition}
+                  className="xl:items-center"
+                />
               </SectionCard>
 
               <SectionCard
