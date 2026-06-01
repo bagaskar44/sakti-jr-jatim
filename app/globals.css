@@ -1,26 +1,224 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f7fb;
+  --foreground: #0b1020;
+  --jr-background: #f5f7fb;
+  --jr-foreground: #0b1020;
+  --jr-muted: #5b6b85;
+  --jr-border: #dce3ed;
+  --jr-blue: #1f4fea;
+  --jr-blue-hover: #1746dd;
+  --jr-gradient: linear-gradient(120deg, #22477e 0%, #1f5fac 56%, #166bc6 100%);
+  --jr-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+  --jr-button-shadow: 0 10px 18px rgba(30, 64, 175, 0.28);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: Arial, Helvetica, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer components {
+  .jr-page {
+    background: var(--jr-background);
+    color: var(--jr-foreground);
+    min-height: 100vh;
+  }
+
+  .jr-brand-gradient {
+    background: var(--jr-gradient);
+  }
+
+  .jr-card {
+    background: #ffffff;
+    border: 1px solid var(--jr-border);
+    border-radius: 8px;
+    box-shadow: var(--jr-shadow);
+  }
+
+  .jr-label {
+    color: #334155;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .jr-field {
+    background: #ffffff;
+    border: 1px solid var(--jr-border);
+    border-radius: 7px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 500;
+    min-height: 46px;
+    outline: none;
+    padding: 0 12px;
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+    width: 100%;
+  }
+
+  .jr-field:focus,
+  .jr-field:focus-within {
+    border-color: var(--jr-blue);
+    box-shadow:
+      0 0 0 2px rgba(31, 79, 234, 0.12),
+      0 2px 6px rgba(15, 23, 42, 0.1);
+  }
+
+  .jr-textarea {
+    min-height: 92px;
+    padding-bottom: 12px;
+    padding-top: 12px;
+  }
+
+  .jr-button-primary,
+  .jr-button-secondary,
+  .jr-button-soft {
+    align-items: center;
+    border-radius: 7px;
+    display: inline-flex;
+    font-size: 14px;
+    font-weight: 600;
+    gap: 8px;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 16px;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease,
+      opacity 150ms ease;
+  }
+
+  .jr-button-primary {
+    background: var(--jr-blue);
+    box-shadow: var(--jr-button-shadow);
+    color: #ffffff;
+  }
+
+  .jr-button-primary:hover {
+    background: var(--jr-blue-hover);
+  }
+
+  .jr-button-secondary {
+    background: #ffffff;
+    border: 1px solid var(--jr-border);
+    color: #334155;
+  }
+
+  .jr-button-secondary:hover {
+    background: #f8fafc;
+  }
+
+  .jr-button-soft {
+    background: #eff5ff;
+    border: 1px solid #cfe0ff;
+    color: #1d4ed8;
+  }
+
+  .jr-button-soft:hover {
+    background: #e3eeff;
+  }
+
+  .jr-button-primary:disabled,
+  .jr-button-secondary:disabled,
+  .jr-button-soft:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .jr-table-shell {
+    border: 1px solid var(--jr-border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .jr-table-head {
+    background: #f8fafc;
+    color: #5b6b85;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .jr-state {
+    background: #ffffff;
+    border: 1px solid var(--jr-border);
+    border-radius: 8px;
+    box-shadow: var(--jr-shadow);
+  }
+}
+
+.revenue-leaflet-map {
+  font-family: Arial, Helvetica, sans-serif;
+  height: 100%;
+  isolation: isolate;
+  min-height: 430px;
+  width: 100%;
+}
+
+.revenue-leaflet-map .leaflet-control-attribution {
+  border-top-left-radius: 8px;
+  font-size: 10px;
+}
+
+.revenue-leaflet-map .leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+}
+
+.revenue-leaflet-map .leaflet-popup-content {
+  margin: 12px;
+}
+
+.revenue-map-marker-host {
+  background: transparent;
+  border: 0;
+}
+
+.revenue-map-marker {
+  align-items: center;
+  border: 3px solid #ffffff;
+  border-radius: 999px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.28);
+  color: #ffffff;
+  display: flex;
+  font-size: 10px;
+  font-weight: 900;
+  height: 100%;
+  justify-content: center;
+  letter-spacing: 0;
+  line-height: 1;
+  width: 100%;
+}
+
+.revenue-map-marker--kanwil {
+  background: #0f172a;
+}
+
+.revenue-map-marker--cabang {
+  background: #1d4ed8;
+}
+
+.revenue-map-marker--pelayanan {
+  background: #0f766e;
+}
+
+.revenue-map-marker--selected {
+  box-shadow:
+    0 0 0 4px rgba(59, 130, 246, 0.3),
+    0 14px 28px rgba(15, 23, 42, 0.32);
 }
