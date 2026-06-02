@@ -4,18 +4,18 @@ import { useCallback, useEffect, useState } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
+  Clock,
   CloudUpload,
   ClipboardList,
   Database,
   Eye,
   FileCheck2,
-  Filter,
-  History,
   Loader2,
   RefreshCcw,
   XCircle,
 } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { KpiCard } from "@/components/dashboard/KpiCard";
 import { SectionCard } from "@/components/dashboard/SectionCard";
 import { formatNumber, formatRupiah } from "@/lib/formatters";
 
@@ -162,14 +162,6 @@ function getLogTotalRows(log: SyncLogRow) {
   );
 }
 
-function getStatusFilterLabel(status: AuditStatusFilter) {
-  if (status === "success") return "Berhasil";
-  if (status === "warning") return "Ada Warning";
-  if (status === "failed") return "Gagal";
-
-  return "Semua Status";
-}
-
 function StatusBadge({ status }: { status: StatusType }) {
   if (status === "loading") {
     return (
@@ -273,28 +265,36 @@ function IssueContextDetails({
   const examples = Array.isArray(issue.context?.examples)
     ? issue.context.examples.map(getContextText)
     : [];
+  const borderTone = type === "error" ? "border-red-100" : "border-orange-100";
+  const labelTone = type === "error" ? "text-red-700" : "text-orange-700";
+  const chipTone =
+    type === "error"
+      ? "bg-red-100 text-red-700"
+      : "bg-orange-100 text-orange-700";
 
   if (unmappedUnits.length > 0) {
     return (
-      <div className="mt-3 rounded-[8px] border border-orange-100 bg-orange-50 p-3">
+      <div className={`mt-3 border-t pt-3 ${borderTone}`}>
         <div className="mb-2 flex items-center justify-between gap-3">
-          <p className="text-xs font-bold uppercase tracking-wide text-orange-700">
+          <p className={`text-xs font-bold uppercase tracking-wide ${labelTone}`}>
             Unit belum terpetakan
           </p>
-          <span className="rounded-full bg-white px-2 py-1 text-xs font-bold text-orange-700">
+          <span className={`rounded-full px-2 py-1 text-xs font-bold ${chipTone}`}>
             {formatNumber(totalUnmappedUnits)} nama
           </span>
         </div>
 
-        <div className="grid grid-cols-1 gap-2">
+        <div className={`divide-y ${borderTone}`}>
           {unmappedUnits.map((item, index) => (
             <div
               key={`${item.sheet}-${item.field}-${item.value}-${index}`}
-            className="rounded-[7px] bg-white px-3 py-2"
+              className="grid gap-1 py-2 first:pt-0 last:pb-0 sm:grid-cols-[minmax(180px,1fr)_minmax(140px,auto)] sm:items-center"
             >
-              <p className="text-sm font-bold text-slate-900">{item.value}</p>
-              <p className="mt-1 text-xs font-semibold text-slate-500">
-                {item.sheet} Â· {item.field}
+              <p className="text-sm font-bold leading-5 text-slate-950">
+                {item.value}
+              </p>
+              <p className="text-xs font-semibold leading-5 text-slate-500 sm:text-right">
+                {item.sheet} / {item.field}
               </p>
             </div>
           ))}
@@ -305,21 +305,15 @@ function IssueContextDetails({
 
   if (examples.length > 0) {
     return (
-      <div
-        className={`mt-3 rounded-[8px] border p-3 ${
-          type === "error"
-            ? "border-red-100 bg-red-50"
-            : "border-orange-100 bg-orange-50"
-        }`}
-      >
-        <p className="mb-2 text-xs font-bold uppercase tracking-wide opacity-70">
+      <div className={`mt-3 border-t pt-3 ${borderTone}`}>
+        <p className={`mb-2 text-xs font-bold uppercase tracking-wide ${labelTone}`}>
           Contoh
         </p>
         <div className="flex flex-wrap gap-1.5">
           {examples.slice(0, 20).map((example, index) => (
             <span
               key={`${example}-${index}`}
-              className="rounded-full bg-white px-2 py-1 text-xs font-semibold text-slate-600"
+              className={`rounded-full px-2 py-1 text-xs font-semibold ${chipTone}`}
             >
               {example}
             </span>
@@ -343,8 +337,24 @@ function IssueList({
 }) {
   const tone =
     type === "error"
-      ? "border-red-200 bg-red-50 text-red-700"
-      : "border-orange-200 bg-orange-50 text-orange-700";
+      ? {
+          panel: "border-red-200 bg-red-50/60",
+          divider: "divide-red-100",
+          headerBorder: "border-red-100",
+          heading: "text-red-700",
+          count: "bg-red-100 text-red-700",
+          meta: "text-red-700",
+          message: "text-red-900",
+        }
+      : {
+          panel: "border-orange-200 bg-orange-50/60",
+          divider: "divide-orange-100",
+          headerBorder: "border-orange-100",
+          heading: "text-orange-700",
+          count: "bg-orange-100 text-orange-700",
+          meta: "text-orange-700",
+          message: "text-orange-900",
+        };
 
   if (issues.length === 0) {
     return (
@@ -355,28 +365,32 @@ function IssueList({
   }
 
   return (
-    <div className={`rounded-[8px] border p-4 ${tone}`}>
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-bold">{title}</h3>
-        <span className="rounded-full bg-white/70 px-2 py-1 text-xs font-bold">
+    <div className={`overflow-hidden rounded-[8px] border ${tone.panel}`}>
+      <div
+        className={`flex items-center justify-between gap-3 border-b px-4 py-3 ${tone.headerBorder}`}
+      >
+        <h3 className={`text-sm font-bold ${tone.heading}`}>{title}</h3>
+        <span className={`rounded-full px-2 py-1 text-xs font-bold ${tone.count}`}>
           {issues.length} item
         </span>
       </div>
 
-      <div className="max-h-80 space-y-3 overflow-y-auto pr-2">
+      <div className={`max-h-80 divide-y overflow-y-auto ${tone.divider}`}>
         {issues.map((issue, index) => (
-          <div
+          <article
             key={`${issue.sheet}-${index}`}
-            className="rounded-[8px] bg-white p-3"
+            className="px-4 py-3"
           >
-            <p className="text-xs font-bold uppercase tracking-wide opacity-70">
+            <p className={`text-xs font-bold uppercase tracking-wide ${tone.meta}`}>
               {issue.sheet}
-              {issue.row ? ` · Baris ${issue.row}` : ""}
-              {issue.column ? ` · ${issue.column}` : ""}
+              {issue.row ? ` / Baris ${issue.row}` : ""}
+              {issue.column ? ` / ${issue.column}` : ""}
             </p>
-            <p className="mt-1 text-sm font-semibold">{issue.message}</p>
+            <p className={`mt-1 text-sm font-semibold leading-6 ${tone.message}`}>
+              {issue.message}
+            </p>
             <IssueContextDetails issue={issue} type={type} />
-          </div>
+          </article>
         ))}
       </div>
     </div>
@@ -396,19 +410,36 @@ function AuditSummary({ logs }: { logs: SyncLogRow[] }) {
 
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
-      <MetricBox label="Log Ditampilkan" value={logs.length} />
-      <MetricBox label="Berhasil" value={successCount} />
-      <MetricBox label="Ada Warning" value={warningCount} />
-      <MetricBox label="Gagal" value={failedCount} />
-      <div className="rounded-[8px] border border-[#dce3ed] bg-[#f8fafc] p-4">
-        <p className="jr-label">Terakhir Sync</p>
-        <p className="mt-2 text-sm font-semibold leading-5 text-slate-950">
-          {latestLog ? formatDateTime(latestLog.created_at) : "-"}
-        </p>
-        <p className="mt-1 text-xs font-semibold text-slate-500">
-          {formatNumber(totalRows)} row terbaca
-        </p>
-      </div>
+      <KpiCard
+        title="Log Ditampilkan"
+        value={formatNumber(logs.length)}
+        subtitle="Sesuai filter aktif"
+        icon={<ClipboardList size={22} />}
+      />
+      <KpiCard
+        title="Berhasil"
+        value={formatNumber(successCount)}
+        subtitle="Sync sukses"
+        icon={<CheckCircle2 size={22} />}
+      />
+      <KpiCard
+        title="Ada Warning"
+        value={formatNumber(warningCount)}
+        subtitle="Sync dengan catatan"
+        icon={<AlertTriangle size={22} />}
+      />
+      <KpiCard
+        title="Gagal"
+        value={formatNumber(failedCount)}
+        subtitle="Sync gagal"
+        icon={<XCircle size={22} />}
+      />
+      <KpiCard
+        title="Terakhir Sync"
+        value={latestLog ? formatDateTime(latestLog.created_at) : "-"}
+        subtitle={`${formatNumber(totalRows)} row terbaca`}
+        icon={<Clock size={22} />}
+      />
     </div>
   );
 }
@@ -420,7 +451,6 @@ function AuditFilterBar({
   onStatusChange,
   onYearChange,
   onMonthChange,
-  onReset,
 }: {
   status: AuditStatusFilter;
   year: string;
@@ -428,16 +458,10 @@ function AuditFilterBar({
   onStatusChange: (value: AuditStatusFilter) => void;
   onYearChange: (value: string) => void;
   onMonthChange: (value: string) => void;
-  onReset: () => void;
 }) {
   return (
-    <div className="jr-card bg-[#f8fafc] p-4">
-      <div className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900">
-        <Filter size={16} className="text-blue-700" />
-        Filter Audit
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+    <div className="border-b border-[#e5edf6] pb-4">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <div>
           <label className="jr-label">
             Status
@@ -486,17 +510,6 @@ function AuditFilterBar({
               </option>
             ))}
           </select>
-        </div>
-
-        <div className="flex items-end">
-          <button
-            type="button"
-            onClick={onReset}
-            className="jr-button-secondary w-full"
-          >
-            <RefreshCcw size={16} />
-            Reset
-          </button>
         </div>
       </div>
     </div>
@@ -813,12 +826,6 @@ export default function ImportPendapatanPage() {
     return () => window.clearTimeout(timeoutId);
   }, [fetchSyncLogs]);
 
-  function resetAuditFilters() {
-    setLogStatusFilter("all");
-    setLogYearFilter("");
-    setLogMonthFilter("");
-  }
-
   async function handleValidate() {
     setIsValidating(true);
     setValidateResult(null);
@@ -878,10 +885,7 @@ export default function ImportPendapatanPage() {
 
       const json = (await response.json()) as SyncResponse;
       setSyncResult(json);
-
-      if (json.success) {
-        fetchSyncLogs();
-      }
+      await fetchSyncLogs();
     } catch (error) {
       setSyncResult({
         success: false,
@@ -1002,7 +1006,7 @@ export default function ImportPendapatanPage() {
 
               <div className="flex items-center gap-2 rounded-[8px] bg-white px-4 py-3 text-sm font-semibold text-slate-700">
                 <Database size={18} className="text-blue-700" />
-                Google Sheets ke Backend ke Supabase
+                Sumber Data Google Sheets
               </div>
             </div>
           </div>
@@ -1114,28 +1118,7 @@ export default function ImportPendapatanPage() {
           </SectionCard>
         )}
 
-        <SectionCard
-          title="Riwayat Sync Pendapatan"
-          action={
-            <div className="flex items-center gap-2">
-              <span className="hidden rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 md:inline-flex">
-                {getStatusFilterLabel(logStatusFilter)}
-              </span>
-              <button
-                onClick={fetchSyncLogs}
-                disabled={isLoadingLogs}
-                className="jr-button-secondary min-h-0 px-3 py-2 text-xs disabled:opacity-60"
-              >
-                {isLoadingLogs ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <History size={14} />
-                )}
-                Refresh
-              </button>
-            </div>
-          }
-        >
+        <SectionCard title="Riwayat Sync Pendapatan">
           <div className="space-y-4">
             <AuditFilterBar
               status={logStatusFilter}
@@ -1144,7 +1127,6 @@ export default function ImportPendapatanPage() {
               onStatusChange={setLogStatusFilter}
               onYearChange={setLogYearFilter}
               onMonthChange={setLogMonthFilter}
-              onReset={resetAuditFilters}
             />
 
             <AuditSummary logs={syncLogs} />

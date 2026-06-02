@@ -15,7 +15,7 @@ type DashboardHeaderProps = {
   title: string;
   subtitle?: string;
   year: number;
-  month: number;
+  month: number | string;
   updatedAt?: string;
 };
 

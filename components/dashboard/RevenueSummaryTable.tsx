@@ -25,13 +25,13 @@ function getDetailHref({
 }: {
   unitName: string;
   year?: number;
-  month?: number;
+  month?: number | "ALL";
   source: string;
 }) {
   const params = new URLSearchParams();
 
   if (year) params.set("year", String(year));
-  if (month) params.set("month", String(month));
+  if (month) params.set("month", month === "ALL" ? "all" : String(month));
   if (source !== "ALL") {
     params.set("source", source);
     params.set("tab", source);
@@ -51,7 +51,7 @@ export function RevenueSummaryTable({
   units: UnitRow[];
   source: string;
   year?: number;
-  month?: number;
+  month?: number | "ALL";
 }) {
   const sortedUnits = [...units]
     .sort((a, b) => getAmountBySource(b, source) - getAmountBySource(a, source))

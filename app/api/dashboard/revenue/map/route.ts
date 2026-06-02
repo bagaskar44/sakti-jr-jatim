@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { resolveRevenuePeriod } from "@/lib/dashboard/period";
+import {
+  getMonthsForFilter,
+  resolveRevenuePeriodFilter,
+} from "@/lib/dashboard/period";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -31,10 +34,36 @@ function toNumber(value: unknown) {
   return Number.isNaN(result) ? 0 : result;
 }
 
+function aggregateRevenueRows(rows: RevenueUnitRow[]) {
+  const byUnit = new Map<string, RevenueUnitRow>();
+
+  for (const row of rows) {
+    const current = byUnit.get(row.unit_name) ?? {
+      unit_name: row.unit_name,
+      swdkllj_total: 0,
+      iwkbu_total: 0,
+      iwkl_total: 0,
+      total_revenue: 0,
+    };
+
+    byUnit.set(row.unit_name, {
+      unit_name: row.unit_name,
+      swdkllj_total:
+        toNumber(current.swdkllj_total) + toNumber(row.swdkllj_total),
+      iwkbu_total: toNumber(current.iwkbu_total) + toNumber(row.iwkbu_total),
+      iwkl_total: toNumber(current.iwkl_total) + toNumber(row.iwkl_total),
+      total_revenue:
+        toNumber(current.total_revenue) + toNumber(row.total_revenue),
+    });
+  }
+
+  return Array.from(byUnit.values());
+}
+
 export async function GET(request: Request) {
   try {
     const supabase = createSupabaseAdminClient();
-    const period = await resolveRevenuePeriod(supabase, request);
+    const period = await resolveRevenuePeriodFilter(supabase, request);
 
     if (!period.success) {
       return NextResponse.json(
@@ -45,6 +74,8 @@ export async function GET(request: Request) {
         { status: 400 }
       );
     }
+
+    const months = getMonthsForFilter(period.periodYear, period.periodMonth);
 
     const { data: units, error: unitsError } = await supabase
       .from("master_units")
@@ -68,7 +99,7 @@ export async function GET(request: Request) {
         "unit_name, swdkllj_total, iwkbu_total, iwkl_total, total_revenue"
       )
       .eq("period_year", period.periodYear)
-      .eq("period_month", period.periodMonth);
+      .in("period_month", months);
 
     if (revenueError) {
       throw new Error(revenueError.message);
@@ -82,7 +113,7 @@ export async function GET(request: Request) {
       unitById.set(unit.id, unit);
     }
 
-    for (const row of (revenueRows ?? []) as RevenueUnitRow[]) {
+    for (const row of aggregateRevenueRows((revenueRows ?? []) as RevenueUnitRow[])) {
       revenueByName.set(normalizeName(row.unit_name), row);
     }
 
@@ -113,6 +144,7 @@ export async function GET(request: Request) {
         year: period.periodYear,
         month: period.periodMonth,
         source: period.source,
+        months,
       },
       count: data.length,
       data,

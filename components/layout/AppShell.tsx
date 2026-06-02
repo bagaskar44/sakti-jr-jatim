@@ -63,6 +63,21 @@ const adminMenu = [
     href: "/admin/import-pendapatan",
     icon: UploadCloud,
   },
+  {
+    label: "Import Pelayanan",
+    href: "/admin/import-pelayanan",
+    icon: UploadCloud,
+  },
+  {
+    label: "Import Kecelakaan",
+    href: "/admin/import-kecelakaan",
+    icon: UploadCloud,
+  },
+  {
+    label: "Import Kegiatan",
+    href: "/admin/import-kegiatan",
+    icon: UploadCloud,
+  },
 ];
 
 function BrandLockup() {

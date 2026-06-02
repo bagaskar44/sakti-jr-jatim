@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { resolveRevenuePeriod } from "@/lib/dashboard/period";
+import {
+  getMonthsForFilter,
+  resolveRevenuePeriodFilter,
+} from "@/lib/dashboard/period";
 
 export const dynamic = "force-dynamic";
 
@@ -13,10 +16,51 @@ function parseLimit(value: string | null) {
   return limit;
 }
 
+type RevenueUnitRow = {
+  unit_name: string;
+  swdkllj_total: number | string | null;
+  iwkbu_total: number | string | null;
+  iwkl_total: number | string | null;
+  total_revenue: number | string | null;
+};
+
+function toNumber(value: unknown) {
+  const result = Number(value ?? 0);
+  return Number.isNaN(result) ? 0 : result;
+}
+
+function aggregateUnits(rows: RevenueUnitRow[]) {
+  const byUnit = new Map<string, RevenueUnitRow>();
+
+  for (const row of rows) {
+    const current = byUnit.get(row.unit_name) ?? {
+      unit_name: row.unit_name,
+      swdkllj_total: 0,
+      iwkbu_total: 0,
+      iwkl_total: 0,
+      total_revenue: 0,
+    };
+
+    byUnit.set(row.unit_name, {
+      unit_name: row.unit_name,
+      swdkllj_total:
+        toNumber(current.swdkllj_total) + toNumber(row.swdkllj_total),
+      iwkbu_total: toNumber(current.iwkbu_total) + toNumber(row.iwkbu_total),
+      iwkl_total: toNumber(current.iwkl_total) + toNumber(row.iwkl_total),
+      total_revenue:
+        toNumber(current.total_revenue) + toNumber(row.total_revenue),
+    });
+  }
+
+  return Array.from(byUnit.values()).sort(
+    (a, b) => toNumber(b.total_revenue) - toNumber(a.total_revenue)
+  );
+}
+
 export async function GET(request: Request) {
   try {
     const supabase = createSupabaseAdminClient();
-    const period = await resolveRevenuePeriod(supabase, request);
+    const period = await resolveRevenuePeriodFilter(supabase, request);
 
     if (!period.success) {
       return NextResponse.json(
@@ -31,14 +75,14 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const limit = parseLimit(searchParams.get("limit"));
     const q = searchParams.get("q");
+    const months = getMonthsForFilter(period.periodYear, period.periodMonth);
 
     let query = supabase
       .from("v_revenue_by_unit_monthly")
       .select("*")
       .eq("period_year", period.periodYear)
-      .eq("period_month", period.periodMonth)
-      .order("total_revenue", { ascending: false })
-      .limit(limit);
+      .in("period_month", months)
+      .order("total_revenue", { ascending: false });
 
     if (q && q.trim()) {
       query = query.ilike("unit_name", `%${q.trim()}%`);
@@ -50,15 +94,19 @@ export async function GET(request: Request) {
       throw new Error(error.message);
     }
 
+    const aggregatedData = aggregateUnits((data ?? []) as RevenueUnitRow[]);
+    const limitedData = aggregatedData.slice(0, limit);
+
     return NextResponse.json({
       success: true,
       period: {
         year: period.periodYear,
         month: period.periodMonth,
         source: period.source,
+        months,
       },
-      count: data?.length ?? 0,
-      data: data ?? [],
+      count: limitedData.length,
+      data: limitedData,
     });
   } catch (error) {
     return NextResponse.json(

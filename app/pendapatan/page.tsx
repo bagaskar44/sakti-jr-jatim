@@ -989,7 +989,9 @@ export default function PendapatanPage() {
           source={source}
           unitQuery={unitQuery}
           onYearChange={setYear}
-          onMonthChange={setMonth}
+          onMonthChange={(value) => {
+            if (value !== "ALL") setMonth(value);
+          }}
           onSourceChange={setSource}
           onUnitQueryChange={setUnitQuery}
           onApply={handleApply}

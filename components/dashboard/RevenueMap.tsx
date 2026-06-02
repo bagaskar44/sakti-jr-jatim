@@ -17,11 +17,14 @@ export type RevenueMapUnit = {
   total_revenue: number | string;
 };
 
+export type DashboardFunction = "PENDAPATAN" | "PELAYANAN" | "KECELAKAAN";
+
 export type RevenueMapProps = {
   units: RevenueMapUnit[];
   source: string;
   year: number;
-  month: number;
+  month: number | "ALL";
+  detailFunction: DashboardFunction;
 };
 
 const LeafletRevenueMap = dynamic<RevenueMapProps>(

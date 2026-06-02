@@ -1,16 +1,32 @@
 import { Check, RotateCcw } from "lucide-react";
 
+export type MonthFilterValue = number | "ALL";
+
+type FilterOption = {
+  value: string;
+  label: string;
+};
+
 type FilterBarProps = {
   year: number;
-  month: number;
+  month: MonthFilterValue;
   source: string;
   unitQuery: string;
   onYearChange: (value: number) => void;
-  onMonthChange: (value: number) => void;
+  onMonthChange: (value: MonthFilterValue) => void;
   onSourceChange: (value: string) => void;
   onUnitQueryChange: (value: string) => void;
-  onApply: () => void;
-  onReset: () => void;
+  onApply?: () => void;
+  onReset?: () => void;
+  allowAllMonths?: boolean;
+  showPeriodFilter?: boolean;
+  showSourceFilter?: boolean;
+  showActions?: boolean;
+  sourceLabel?: string;
+  sourceOptions?: FilterOption[];
+  unitLabel?: string;
+  unitMode?: "text" | "select";
+  unitOptions?: FilterOption[];
 };
 
 const months = [
@@ -28,6 +44,13 @@ const months = [
   { value: 12, label: "Desember" },
 ];
 
+const revenueSourceOptions = [
+  { value: "ALL", label: "Semua" },
+  { value: "SWDKLLJ", label: "SWDKLLJ" },
+  { value: "IWKBU", label: "IWKBU" },
+  { value: "IWKL", label: "IWKL" },
+];
+
 export function FilterBar({
   year,
   month,
@@ -39,24 +62,52 @@ export function FilterBar({
   onUnitQueryChange,
   onApply,
   onReset,
+  allowAllMonths = false,
+  showPeriodFilter = true,
+  showSourceFilter = true,
+  showActions = true,
+  sourceLabel = "Jenis Pendapatan",
+  sourceOptions = revenueSourceOptions,
+  unitLabel = "Unit/Kantor",
+  unitMode = "text",
+  unitOptions = [],
 }: FilterBarProps) {
+  function handleMonthChange(value: string) {
+    onMonthChange(value === "ALL" ? "ALL" : Number(value));
+  }
+
   return (
     <section className="jr-card p-3">
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
-        <div>
-          <label className="jr-label">Periode</label>
-          <select className="jr-field mt-1 h-10 min-h-10">
-            <option>Bulanan</option>
-          </select>
-        </div>
+      <div
+        className={`grid grid-cols-1 gap-3 md:grid-cols-2 ${
+          showPeriodFilter && showSourceFilter
+            ? "xl:grid-cols-6"
+            : showPeriodFilter || showSourceFilter
+            ? showActions
+              ? "xl:grid-cols-5"
+              : "xl:grid-cols-4"
+            : showActions
+            ? "xl:grid-cols-4"
+            : "xl:grid-cols-3"
+        }`}
+      >
+        {showPeriodFilter && (
+          <div>
+            <label className="jr-label">Periode</label>
+            <select className="jr-field mt-1 h-10 min-h-10">
+              <option>Bulanan</option>
+            </select>
+          </div>
+        )}
 
         <div>
           <label className="jr-label">Bulan</label>
           <select
             value={month}
-            onChange={(event) => onMonthChange(Number(event.target.value))}
+            onChange={(event) => handleMonthChange(event.target.value)}
             className="jr-field mt-1 h-10 min-h-10"
           >
+            {allowAllMonths && <option value="ALL">All</option>}
             {months.map((item) => (
               <option key={item.value} value={item.value}>
                 {item.label}
@@ -80,47 +131,67 @@ export function FilterBar({
           </select>
         </div>
 
-        <div>
-          <label className="jr-label">Jenis Pendapatan</label>
-          <select
-            value={source}
-            onChange={(event) => onSourceChange(event.target.value)}
-            className="jr-field mt-1 h-10 min-h-10"
-          >
-            <option value="ALL">Semua</option>
-            <option value="SWDKLLJ">SWDKLLJ</option>
-            <option value="IWKBU">IWKBU</option>
-            <option value="IWKL">IWKL</option>
-          </select>
-        </div>
+        {showSourceFilter && (
+          <div>
+            <label className="jr-label">{sourceLabel}</label>
+            <select
+              value={source}
+              onChange={(event) => onSourceChange(event.target.value)}
+              className="jr-field mt-1 h-10 min-h-10"
+            >
+              {sourceOptions.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div>
-          <label className="jr-label">Unit/Kantor</label>
-          <input
-            value={unitQuery}
-            onChange={(event) => onUnitQueryChange(event.target.value)}
-            placeholder="Semua"
-            className="jr-field mt-1 h-10 min-h-10"
-          />
+          <label className="jr-label">{unitLabel}</label>
+          {unitMode === "select" ? (
+            <select
+              value={unitQuery}
+              onChange={(event) => onUnitQueryChange(event.target.value)}
+              className="jr-field mt-1 h-10 min-h-10"
+            >
+              <option value="">All</option>
+              {unitOptions.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              value={unitQuery}
+              onChange={(event) => onUnitQueryChange(event.target.value)}
+              placeholder="Semua"
+              className="jr-field mt-1 h-10 min-h-10"
+            />
+          )}
         </div>
 
-        <div className="flex items-end gap-2">
-          <button
-            onClick={onReset}
-            className="jr-button-secondary h-10 min-h-10 flex-1 px-3"
-          >
-            <RotateCcw size={16} />
-            Reset
-          </button>
+        {showActions && (
+          <div className="flex items-end gap-2">
+            <button
+              onClick={onReset}
+              className="jr-button-secondary h-10 min-h-10 flex-1 px-3"
+            >
+              <RotateCcw size={16} />
+              Reset
+            </button>
 
-          <button
-            onClick={onApply}
-            className="jr-button-primary h-10 min-h-10 flex-1 px-3"
-          >
-            <Check size={16} />
-            Terapkan
-          </button>
-        </div>
+            <button
+              onClick={onApply}
+              className="jr-button-primary h-10 min-h-10 flex-1 px-3"
+            >
+              <Check size={16} />
+              Terapkan
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

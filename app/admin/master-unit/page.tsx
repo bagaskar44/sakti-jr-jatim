@@ -9,13 +9,13 @@ import {
   Loader2,
   MapPin,
   Pencil,
-  Plus,
   Power,
   RefreshCcw,
   Save,
   Search,
   XCircle,
 } from "lucide-react";
+import { MasterUnitMapPicker } from "@/components/admin/MasterUnitMapPicker";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { SectionCard } from "@/components/dashboard/SectionCard";
 
@@ -107,6 +107,9 @@ const emptyForm: FormState = {
   is_active: true,
   aliases_text: "",
 };
+
+// Set true to show the Generate and Refresh buttons again.
+const showMasterUnitUtilities = false;
 
 function getCurrentPeriod() {
   const now = new Date();
@@ -246,11 +249,11 @@ export default function MasterUnitPage() {
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       fetchUnits();
-    }, 0);
+    }, 300);
 
     return () => window.clearTimeout(timeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unitType, status]);
+  }, [q, unitType, status]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -463,19 +466,7 @@ export default function MasterUnitPage() {
         <div ref={formSectionRef} className="scroll-mt-24">
           <SectionCard
             title={form.id ? `Edit Unit: ${form.canonical_name}` : "Tambah Unit"}
-          action={
-            <button
-              onClick={() => {
-                setForm(emptyForm);
-                setMessage(null);
-              }}
-              className="jr-button-secondary min-h-0 px-3 py-2 text-xs"
-            >
-              <Plus size={14} />
-              {form.id ? "Batal Edit" : "Baru"}
-            </button>
-          }
-        >
+          >
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
               <div>
@@ -558,42 +549,22 @@ export default function MasterUnitPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1fr_2fr_auto]">
-              <div>
-                <label className="jr-label">
-                  Latitude
-                </label>
-                <input
-                  value={form.latitude}
-                  onChange={(event) =>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+              <div className="lg:col-span-2">
+                <MasterUnitMapPicker
+                  latitude={form.latitude}
+                  longitude={form.longitude}
+                  onChange={(value) =>
                     setForm((current) => ({
                       ...current,
-                      latitude: event.target.value,
+                      latitude: value.latitude,
+                      longitude: value.longitude,
                     }))
                   }
-                  inputMode="decimal"
-                  className="jr-field mt-2"
                 />
               </div>
 
-              <div>
-                <label className="jr-label">
-                  Longitude
-                </label>
-                <input
-                  value={form.longitude}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      longitude: event.target.value,
-                    }))
-                  }
-                  inputMode="decimal"
-                  className="jr-field mt-2"
-                />
-              </div>
-
-              <div>
+              <div className="lg:col-span-2">
                 <label className="jr-label">
                   Alias
                 </label>
@@ -605,40 +576,36 @@ export default function MasterUnitPage() {
                       aliases_text: event.target.value,
                     }))
                   }
-                  rows={3}
-                  className="jr-field jr-textarea mt-2 resize-none"
+                  rows={1}
+                  className="jr-field mt-2 h-[46px] min-h-[46px] resize-none overflow-hidden py-3"
                 />
               </div>
+            </div>
 
-              <div className="flex flex-col justify-end gap-3">
-                <label className="inline-flex min-h-[46px] items-center gap-2 rounded-[7px] border border-[#dce3ed] bg-[#f8fafc] px-3 py-3 text-sm font-semibold text-slate-700">
-                  <input
-                    type="checkbox"
-                    checked={form.is_active}
-                    onChange={(event) =>
-                      setForm((current) => ({
-                        ...current,
-                        is_active: event.target.checked,
-                      }))
-                    }
-                    className="h-4 w-4"
-                  />
-                  Aktif
-                </label>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setForm(emptyForm);
+                  setMessage(null);
+                }}
+                className="jr-button-secondary min-w-[116px]"
+              >
+                Reset Form
+              </button>
 
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="jr-button-primary"
-                >
-                  {isSaving ? (
-                    <Loader2 size={17} className="animate-spin" />
-                  ) : (
-                    <Save size={17} />
-                  )}
-                  Simpan
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="jr-button-primary min-w-[116px]"
+              >
+                {isSaving ? (
+                  <Loader2 size={17} className="animate-spin" />
+                ) : (
+                  <Save size={17} />
+                )}
+                Simpan
+              </button>
             </div>
           </form>
           </SectionCard>
@@ -647,44 +614,43 @@ export default function MasterUnitPage() {
         <SectionCard
           title="Daftar Master Unit"
           action={
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                onClick={handleSeed}
-                disabled={isSeeding}
-                className="inline-flex items-center gap-2 rounded-[7px] border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-60"
-              >
-                {isSeeding ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <GitBranch size={14} />
-                )}
-                Generate
-              </button>
+            showMasterUnitUtilities ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={handleSeed}
+                  disabled={isSeeding}
+                  className="inline-flex items-center gap-2 rounded-[7px] border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-60"
+                >
+                  {isSeeding ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <GitBranch size={14} />
+                  )}
+                  Generate
+                </button>
 
-              <button
-                onClick={fetchUnits}
-                disabled={isLoading}
-                className="jr-button-secondary min-h-0 px-3 py-2 text-xs disabled:opacity-60"
-              >
-                {isLoading ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <RefreshCcw size={14} />
-                )}
-                Refresh
-              </button>
-            </div>
+                <button
+                  onClick={fetchUnits}
+                  disabled={isLoading}
+                  className="jr-button-secondary min-h-0 px-3 py-2 text-xs disabled:opacity-60"
+                >
+                  {isLoading ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <RefreshCcw size={14} />
+                  )}
+                  Refresh
+                </button>
+              </div>
+            ) : null
           }
         >
-          <div className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-[1fr_220px_180px_auto]">
+          <div className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-[minmax(360px,1fr)_220px_180px]">
             <div className="jr-field flex items-center gap-3 px-3 py-0">
               <Search size={17} className="text-slate-400" />
               <input
                 value={q}
                 onChange={(event) => setQ(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") fetchUnits();
-                }}
                 placeholder="Cari unit atau alias"
                 className="w-full bg-transparent text-sm font-medium outline-none"
               />
@@ -713,13 +679,6 @@ export default function MasterUnitPage() {
               <option value="inactive">Nonaktif</option>
             </select>
 
-            <button
-              onClick={fetchUnits}
-              className="jr-button-primary"
-            >
-              <Search size={17} />
-              Cari
-            </button>
           </div>
 
           {isLoading ? (

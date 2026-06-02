@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   BarChart3,
-  Bus,
-  CreditCard,
-  ReceiptText,
-  Ship,
+  CalendarCheck2,
+  HeartPulse,
+  Percent,
+  ShieldCheck,
   Users,
 } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
@@ -16,11 +16,18 @@ import {
   RevenueMap,
   type RevenueMapUnit,
 } from "@/components/dashboard/RevenueMap";
-import { RevenueCompositionChart } from "@/components/dashboard/RevenueCompositionChart";
+import {
+  FunctionTrendChart,
+  type FunctionTrendDatum,
+} from "@/components/dashboard/FunctionTrendChart";
+import { LatestActivitiesSection } from "@/components/dashboard/LatestActivitiesSection";
 import { RevenueSummaryTable } from "@/components/dashboard/RevenueSummaryTable";
 import { SectionCard } from "@/components/dashboard/SectionCard";
 import { TopUnitsCard } from "@/components/dashboard/TopUnitsCard";
 import { formatNumber, formatRupiah, formatPercent } from "@/lib/formatters";
+
+type DashboardMonthFilter = number | "ALL";
+type TrendFunction = "PENDAPATAN" | "PELAYANAN" | "KECELAKAAN";
 
 type OverviewData = {
   batch_id: string;
@@ -36,9 +43,19 @@ type OverviewData = {
   iwkbu_growth_pct: number | null;
 };
 
-type CompositionItem = {
-  source_name: string;
-  amount: number;
+type ComparisonData = {
+  previous_year: number;
+  previous_month: DashboardMonthFilter;
+  previous_months: number[];
+  previous_total_revenue: number;
+  growth_pct: number | null;
+  label: string;
+};
+
+type RevenueTrendItem = {
+  month: number;
+  label: string;
+  total_revenue: number;
 };
 
 type UnitRow = {
@@ -52,8 +69,9 @@ type UnitRow = {
 type OverviewResponse = {
   success: boolean;
   overview: OverviewData;
-  composition: CompositionItem[];
+  comparison: ComparisonData;
   top_units: UnitRow[];
+  trend: RevenueTrendItem[];
 };
 
 type UnitsResponse = {
@@ -66,13 +84,38 @@ type MapResponse = {
   data: RevenueMapUnit[];
 };
 
-function getAmountBySource(unit: UnitRow, source: string) {
-  if (source === "SWDKLLJ") return Number(unit.swdkllj_total ?? 0);
-  if (source === "IWKBU") return Number(unit.iwkbu_total ?? 0);
-  if (source === "IWKL") return Number(unit.iwkl_total ?? 0);
+const trendFunctionOptions = [
+  { value: "PENDAPATAN" as const, label: "Pendapatan", Icon: BarChart3 },
+  { value: "PELAYANAN" as const, label: "Pelayanan", Icon: Users },
+  { value: "KECELAKAAN" as const, label: "Kecelakaan", Icon: HeartPulse },
+];
 
-  return Number(unit.total_revenue ?? 0);
-}
+const staticFunctionMetrics = {
+  totalPelayanan: 1248,
+  slaPelayanan: 96.4,
+  totalKecelakaan: 327,
+  totalKegiatan: 84,
+};
+
+const shortMonthLabels = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "Mei",
+  "Jun",
+  "Jul",
+  "Agu",
+  "Sep",
+  "Okt",
+  "Nov",
+  "Des",
+];
+
+const staticTrendValues: Record<Exclude<TrendFunction, "PENDAPATAN">, number[]> = {
+  PELAYANAN: [920, 1010, 974, 1108, 1248, 1192, 1280, 1316, 1268, 1340, 1404, 1456],
+  KECELAKAAN: [248, 256, 271, 292, 327, 318, 336, 352, 341, 365, 374, 389],
+};
 
 function formatUpdatedAt(value?: string) {
   if (!value) return undefined;
@@ -86,36 +129,97 @@ function formatUpdatedAt(value?: string) {
   }).format(new Date(value));
 }
 
+function getGrowthDirection(value: number | null | undefined) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+    return "neutral";
+  }
+
+  return value < 0 ? "down" : "up";
+}
+
+function getMonthQueryValue(month: DashboardMonthFilter) {
+  return month === "ALL" ? "all" : String(month);
+}
+
+function getTrendMonthsForYear(year: number) {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+  const endMonth = year === currentYear ? currentMonth : 12;
+
+  return Array.from({ length: endMonth }, (_, index) => index + 1);
+}
+
+function buildStaticTrend(
+  year: number,
+  functionName: Exclude<TrendFunction, "PENDAPATAN">
+): FunctionTrendDatum[] {
+  return getTrendMonthsForYear(year).map((month) => ({
+    label: shortMonthLabels[month - 1] ?? String(month),
+    value: staticTrendValues[functionName][month - 1] ?? 0,
+  }));
+}
+
+function getTrendConfig(activeFunction: TrendFunction) {
+  if (activeFunction === "PELAYANAN") {
+    return {
+      valueLabel: "Pelayanan",
+      color: "#0891b2",
+      formatter: (value: number) => formatNumber(value),
+    };
+  }
+
+  if (activeFunction === "KECELAKAAN") {
+    return {
+      valueLabel: "Kecelakaan",
+      color: "#e11d48",
+      formatter: (value: number) => formatNumber(value),
+    };
+  }
+
+  return {
+    valueLabel: "Pendapatan",
+    color: "#1f4fea",
+    formatter: (value: number) => formatRupiah(value),
+  };
+}
+
 export default function OverviewDashboardPage() {
   const [year, setYear] = useState(2026);
-  const [month, setMonth] = useState(5);
-  const [source, setSource] = useState("ALL");
+  const [month, setMonth] = useState<DashboardMonthFilter>(5);
   const [unitQuery, setUnitQuery] = useState("");
 
   const [appliedYear, setAppliedYear] = useState(2026);
-  const [appliedMonth, setAppliedMonth] = useState(5);
+  const [appliedMonth, setAppliedMonth] = useState<DashboardMonthFilter>(5);
+  const [activeTrendFunction, setActiveTrendFunction] =
+    useState<TrendFunction>("PENDAPATAN");
 
   const [overview, setOverview] = useState<OverviewData | null>(null);
-  const [composition, setComposition] = useState<CompositionItem[]>([]);
+  const [comparison, setComparison] = useState<ComparisonData | null>(null);
+  const [revenueTrend, setRevenueTrend] = useState<RevenueTrendItem[]>([]);
   const [units, setUnits] = useState<UnitRow[]>([]);
   const [mapUnits, setMapUnits] = useState<RevenueMapUnit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  async function fetchDashboardData(targetYear: number, targetMonth: number) {
+  async function fetchDashboardData(
+    targetYear: number,
+    targetMonth: DashboardMonthFilter
+  ) {
     setLoading(true);
     setError("");
 
     try {
+      const monthQuery = getMonthQueryValue(targetMonth);
       const [overviewResponse, unitsResponse, mapResponse] = await Promise.all([
         fetch(
-          `/api/dashboard/revenue/overview?year=${targetYear}&month=${targetMonth}`
+          `/api/dashboard/revenue/overview?year=${targetYear}&month=${monthQuery}`
         ),
         fetch(
-          `/api/dashboard/revenue/units?year=${targetYear}&month=${targetMonth}&limit=200`
+          `/api/dashboard/revenue/units?year=${targetYear}&month=${monthQuery}&limit=200`
         ),
         fetch(
-          `/api/dashboard/revenue/map?year=${targetYear}&month=${targetMonth}`
+          `/api/dashboard/revenue/map?year=${targetYear}&month=${monthQuery}`
         ),
       ]);
 
@@ -137,7 +241,8 @@ export default function OverviewDashboardPage() {
       }
 
       setOverview(overviewJson.overview);
-      setComposition(overviewJson.composition ?? []);
+      setComparison(overviewJson.comparison ?? null);
+      setRevenueTrend(overviewJson.trend ?? []);
       setUnits(unitsJson.data ?? []);
       setMapUnits(mapJson.data ?? []);
     } catch (fetchError) {
@@ -159,35 +264,78 @@ export default function OverviewDashboardPage() {
     return () => window.clearTimeout(timeoutId);
   }, [appliedYear, appliedMonth]);
 
+  const unitOptions = useMemo(() => {
+    const options = new Map<string, { value: string; label: string }>();
+
+    if (unitQuery.trim()) {
+      options.set(unitQuery, {
+        value: unitQuery,
+        label: unitQuery,
+      });
+    }
+
+    units.forEach((unit) => {
+      options.set(unit.unit_name, {
+        value: unit.unit_name,
+        label: unit.unit_name,
+      });
+    });
+
+    return Array.from(options.values()).sort((a, b) =>
+      a.label.localeCompare(b.label, "id-ID")
+    );
+  }, [units, unitQuery]);
+
   const filteredUnits = useMemo(() => {
-    const query = unitQuery.trim().toUpperCase();
+    const selectedUnitName = unitQuery.trim().toUpperCase();
 
     return units
       .filter((unit) => {
-        if (!query) return true;
+        if (!selectedUnitName) return true;
 
-        return unit.unit_name.toUpperCase().includes(query);
-      })
-      .filter((unit) => {
-        if (source === "ALL") return true;
-
-        return getAmountBySource(unit, source) > 0;
+        return unit.unit_name.toUpperCase() === selectedUnitName;
       });
-  }, [units, unitQuery, source]);
+  }, [units, unitQuery]);
 
-  function handleApply() {
-    setAppliedYear(year);
-    setAppliedMonth(month);
+  const filteredMapUnits = useMemo(() => {
+    const selectedUnitName = unitQuery.trim().toUpperCase();
+
+    return mapUnits.filter((unit) => {
+      if (!selectedUnitName) return true;
+
+      return unit.unit_name.toUpperCase() === selectedUnitName;
+    });
+  }, [mapUnits, unitQuery]);
+
+  function handleYearChange(nextYear: number) {
+    setYear(nextYear);
+    setAppliedYear(nextYear);
   }
 
-  function handleReset() {
-    setYear(2026);
-    setMonth(5);
-    setSource("ALL");
-    setUnitQuery("");
-    setAppliedYear(2026);
-    setAppliedMonth(5);
+  function handleMonthChange(nextMonth: DashboardMonthFilter) {
+    setMonth(nextMonth);
+    setAppliedMonth(nextMonth);
   }
+
+  const trendData = useMemo<FunctionTrendDatum[]>(() => {
+    if (activeTrendFunction === "PENDAPATAN") {
+      return revenueTrend.map((item) => ({
+        label: item.label,
+        value: item.total_revenue,
+      }));
+    }
+
+    return buildStaticTrend(appliedYear, activeTrendFunction);
+  }, [activeTrendFunction, appliedYear, revenueTrend]);
+
+  const trendConfig = useMemo(
+    () => getTrendConfig(activeTrendFunction),
+    [activeTrendFunction]
+  );
+
+  const trendTotal = useMemo(() => {
+    return trendData.reduce((sum, item) => sum + Number(item.value ?? 0), 0);
+  }, [trendData]);
 
   return (
     <main className="jr-page">
@@ -202,14 +350,19 @@ export default function OverviewDashboardPage() {
         <FilterBar
           year={year}
           month={month}
-          source={source}
+          source="ALL"
           unitQuery={unitQuery}
-          onYearChange={setYear}
-          onMonthChange={setMonth}
-          onSourceChange={setSource}
+          onYearChange={handleYearChange}
+          onMonthChange={handleMonthChange}
+          onSourceChange={() => undefined}
           onUnitQueryChange={setUnitQuery}
-          onApply={handleApply}
-          onReset={handleReset}
+          allowAllMonths
+          showPeriodFilter={false}
+          showSourceFilter={false}
+          showActions={false}
+          unitLabel="Unit"
+          unitMode="select"
+          unitOptions={unitOptions}
         />
 
         {loading && (
@@ -230,71 +383,114 @@ export default function OverviewDashboardPage() {
               <KpiCard
                 title="Total Pendapatan"
                 value={formatRupiah(overview.total_revenue)}
-                subtitle="Total seluruh sumber pendapatan"
+                subtitle="Pendapatan periode terpilih"
                 icon={<BarChart3 size={22} />}
               />
 
               <KpiCard
-                title="SWDKLLJ"
-                value={formatRupiah(overview.swdkllj_total)}
-                subtitle="Pendapatan SWDKLLJ"
-                icon={<ReceiptText size={22} />}
-              />
-
-              <KpiCard
-                title="IWKBU"
-                value={formatRupiah(overview.iwkbu_total)}
-                subtitle="Pendapatan tahun berjalan"
-                icon={<Bus size={22} />}
+                title="Capaian"
+                value={
+                  comparison?.growth_pct !== null &&
+                  comparison?.growth_pct !== undefined
+                    ? formatPercent(comparison.growth_pct)
+                    : "-"
+                }
+                subtitle={
+                  comparison
+                    ? `vs ${comparison.label}`
+                    : "Perbandingan tahun sebelumnya"
+                }
+                icon={<Percent size={22} />}
                 trend={
-                  overview.iwkbu_growth_pct !== null
+                  comparison?.growth_pct !== null &&
+                  comparison?.growth_pct !== undefined
                     ? {
-                        value: formatPercent(overview.iwkbu_growth_pct),
-                        direction:
-                          overview.iwkbu_growth_pct < 0 ? "down" : "up",
+                        value: formatPercent(comparison.growth_pct),
+                        direction: getGrowthDirection(comparison.growth_pct),
                       }
                     : undefined
                 }
               />
 
               <KpiCard
-                title="IWKL"
-                value={formatRupiah(overview.iwkl_total)}
-                subtitle="Total nominal IWKL"
-                icon={<Ship size={22} />}
-              />
-
-              <KpiCard
-                title="Transaksi SWDKLLJ"
-                value={formatNumber(overview.swdkllj_transaction_count)}
-                subtitle="Jumlah transaksi"
-                icon={<CreditCard size={22} />}
-              />
-
-              <KpiCard
-                title="Penumpang IWKL"
-                value={formatNumber(overview.iwkl_passenger_count)}
-                subtitle="Jumlah penumpang"
+                title="Total Pelayanan"
+                value={formatNumber(staticFunctionMetrics.totalPelayanan)}
+                subtitle="Static awal modul pelayanan"
                 icon={<Users size={22} />}
+              />
+
+              <KpiCard
+                title="SLA Pelayanan"
+                value={formatPercent(staticFunctionMetrics.slaPelayanan)}
+                subtitle="Static awal modul pelayanan"
+                icon={<ShieldCheck size={22} />}
+              />
+
+              <KpiCard
+                title="Total Kecelakaan"
+                value={formatNumber(staticFunctionMetrics.totalKecelakaan)}
+                subtitle="Static awal modul kecelakaan"
+                icon={<HeartPulse size={22} />}
+              />
+
+              <KpiCard
+                title="Total Kegiatan"
+                value={formatNumber(staticFunctionMetrics.totalKegiatan)}
+                subtitle="Static awal modul kegiatan"
+                icon={<CalendarCheck2 size={22} />}
               />
             </section>
 
+            <section className="flex flex-wrap gap-2">
+              {trendFunctionOptions.map(({ value, label, Icon }) => {
+                const isActive = activeTrendFunction === value;
+
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setActiveTrendFunction(value)}
+                    className={`inline-flex min-h-11 items-center gap-2 rounded-[8px] border px-4 text-sm font-semibold transition ${
+                      isActive
+                        ? "border-[#1f4fea] bg-[#1f4fea] text-white shadow-sm"
+                        : "border-[#dce3ed] bg-white text-slate-700 hover:border-[#1f4fea] hover:text-[#1f4fea]"
+                    }`}
+                    aria-pressed={isActive}
+                  >
+                    <Icon size={18} />
+                    {label}
+                  </button>
+                );
+              })}
+            </section>
+
             <section className="grid grid-cols-1 items-stretch gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-              <SectionCard title="Distribusi Pendapatan">
-                <RevenueCompositionChart
-                  data={composition}
-                  className="xl:items-center"
+              <SectionCard
+                title="Analisis Tren"
+                action={
+                  <div className="flex items-center gap-2 rounded-[7px] border border-[#dce3ed] bg-[#f8fafc] px-3 py-1.5">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500">
+                      Total YtD
+                    </span>
+                    <span className="text-sm font-bold text-slate-950">
+                      {trendConfig.formatter(trendTotal)}
+                    </span>
+                  </div>
+                }
+              >
+                <FunctionTrendChart
+                  data={trendData}
+                  valueLabel={trendConfig.valueLabel}
+                  valueFormatter={trendConfig.formatter}
+                  compactFormatter={trendConfig.formatter}
+                  color={trendConfig.color}
                 />
               </SectionCard>
 
-              <SectionCard
-                title={`Top 5 Unit / Wilayah ${
-                  source === "ALL" ? "" : source
-                }`}
-              >
+              <SectionCard title="Top 5 Unit">
                 <TopUnitsCard
                   units={filteredUnits}
-                  source={source}
+                  source="ALL"
                   year={appliedYear}
                   month={appliedMonth}
                 />
@@ -303,21 +499,24 @@ export default function OverviewDashboardPage() {
 
             <SectionCard title="Peta Interaktif Jawa Timur">
               <RevenueMap
-                units={mapUnits}
-                source={source}
+                units={filteredMapUnits}
+                source="ALL"
                 year={appliedYear}
                 month={appliedMonth}
+                detailFunction={activeTrendFunction}
               />
             </SectionCard>
 
             <SectionCard title="Ringkasan Performa Wilayah">
               <RevenueSummaryTable
                 units={filteredUnits}
-                source={source}
+                source="ALL"
                 year={appliedYear}
                 month={appliedMonth}
               />
             </SectionCard>
+
+            <LatestActivitiesSection />
 
             <footer className="flex flex-col gap-2 border-t border-[#dce3ed] py-5 text-xs text-slate-500 md:flex-row md:items-center md:justify-between">
               <p>Sumber Data: SAKTI JR-JATIM</p>
