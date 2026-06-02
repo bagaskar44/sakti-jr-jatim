@@ -7,7 +7,6 @@ import {
   Clock,
   CloudUpload,
   ClipboardList,
-  Database,
   Eye,
   FileCheck2,
   Loader2,
@@ -259,12 +258,11 @@ function IssueContextDetails({
   type: "error" | "warning";
 }) {
   const unmappedUnits = getUnmappedUnits(issue);
-  const totalUnmappedUnits = Number(
-    issue.context?.total_unmapped_units ?? unmappedUnits.length
-  );
   const examples = Array.isArray(issue.context?.examples)
     ? issue.context.examples.map(getContextText)
     : [];
+  const contextExamples =
+    examples.length > 0 ? examples : unmappedUnits.map((item) => item.value);
   const borderTone = type === "error" ? "border-red-100" : "border-orange-100";
   const labelTone = type === "error" ? "text-red-700" : "text-orange-700";
   const chipTone =
@@ -272,45 +270,14 @@ function IssueContextDetails({
       ? "bg-red-100 text-red-700"
       : "bg-orange-100 text-orange-700";
 
-  if (unmappedUnits.length > 0) {
-    return (
-      <div className={`mt-3 border-t pt-3 ${borderTone}`}>
-        <div className="mb-2 flex items-center justify-between gap-3">
-          <p className={`text-xs font-bold uppercase tracking-wide ${labelTone}`}>
-            Unit belum terpetakan
-          </p>
-          <span className={`rounded-full px-2 py-1 text-xs font-bold ${chipTone}`}>
-            {formatNumber(totalUnmappedUnits)} nama
-          </span>
-        </div>
-
-        <div className={`divide-y ${borderTone}`}>
-          {unmappedUnits.map((item, index) => (
-            <div
-              key={`${item.sheet}-${item.field}-${item.value}-${index}`}
-              className="grid gap-1 py-2 first:pt-0 last:pb-0 sm:grid-cols-[minmax(180px,1fr)_minmax(140px,auto)] sm:items-center"
-            >
-              <p className="text-sm font-bold leading-5 text-slate-950">
-                {item.value}
-              </p>
-              <p className="text-xs font-semibold leading-5 text-slate-500 sm:text-right">
-                {item.sheet} / {item.field}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (examples.length > 0) {
+  if (contextExamples.length > 0) {
     return (
       <div className={`mt-3 border-t pt-3 ${borderTone}`}>
         <p className={`mb-2 text-xs font-bold uppercase tracking-wide ${labelTone}`}>
           Contoh
         </p>
         <div className="flex flex-wrap gap-1.5">
-          {examples.slice(0, 20).map((example, index) => (
+          {contextExamples.slice(0, 20).map((example, index) => (
             <span
               key={`${example}-${index}`}
               className={`rounded-full px-2 py-1 text-xs font-semibold ${chipTone}`}
@@ -775,6 +742,8 @@ export default function ImportPendapatanPage() {
       ? "success"
       : "error"
     : "idle";
+  const importFlowStatus: StatusType =
+    isSyncing || syncResult ? syncStatus : validationStatus;
 
   const rowCounts = validateResult?.rowCounts ?? syncResult?.rowCounts;
   const totals = validateResult?.totals ?? syncResult?.totals;
@@ -912,10 +881,10 @@ export default function ImportPendapatanPage() {
 
       <div className="w-full space-y-5 px-5 pb-5 pt-2">
         <SectionCard
-          title="Pengaturan Periode Import"
-          action={<StatusBadge status={syncStatus} />}
+          title="Import Pendapatan"
+          action={<StatusBadge status={importFlowStatus} />}
         >
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1fr_auto_auto_auto]">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
             <div>
               <label className="jr-label">
                 Bulan
@@ -961,68 +930,25 @@ export default function ImportPendapatanPage() {
                 ) : (
                   <FileCheck2 size={17} />
                 )}
-                Validasi Data
-              </button>
-            </div>
-
-            <div className="flex items-end">
-              <button
-                onClick={handleSync}
-                disabled={!canSync || isValidating || isSyncing}
-                className="jr-button-primary w-full disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isSyncing ? (
-                  <Loader2 size={17} className="animate-spin" />
-                ) : (
-                  <CloudUpload size={17} />
-                )}
-                Sync ke Supabase
-              </button>
-            </div>
-
-            <div className="flex items-end">
-              <button
-                onClick={handleReset}
-                className="jr-button-secondary w-full"
-              >
-                <RefreshCcw size={17} />
-                Reset
+                Cek dan Validasi Data
               </button>
             </div>
           </div>
 
-          <div className="jr-card mt-5 bg-[#f8fafc] p-4">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <p className="text-sm font-bold text-slate-900">
-                  Alur import aktif
-                </p>
-                <p className="mt-1 text-sm leading-6 text-slate-500">
-                  Google Sheets akan dibaca, divalidasi, lalu disimpan ke
-                  Supabase sebagai snapshot bulanan. Jika periode sudah ada,
-                  data lama otomatis diganti.
-                </p>
+          {validateResult && (
+            <div className="mt-5 space-y-4 border-t border-[#e5edf6] pt-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-slate-950">
+                    Status Validasi
+                  </h3>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">
+                    Hasil pengecekan struktur dan isi Google Sheets.
+                  </p>
+                </div>
+                <StatusBadge status={validationStatus} />
               </div>
 
-              <div className="flex items-center gap-2 rounded-[8px] bg-white px-4 py-3 text-sm font-semibold text-slate-700">
-                <Database size={18} className="text-blue-700" />
-                Sumber Data Google Sheets
-              </div>
-            </div>
-          </div>
-        </SectionCard>
-
-        <SectionCard
-          title="Status Validasi"
-          action={<StatusBadge status={validationStatus} />}
-        >
-          {!validateResult ? (
-            <div className="jr-state border-dashed p-8 text-center text-sm font-semibold text-slate-500">
-              Klik Validasi Data untuk mengecek struktur spreadsheet sebelum
-              sync.
-            </div>
-          ) : (
-            <div className="space-y-4">
               <div
                 className={`rounded-[8px] border p-4 text-sm font-semibold ${
                   validateResult.success
@@ -1078,6 +1004,29 @@ export default function ImportPendapatanPage() {
               <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
                 <IssueList title="Errors" issues={errors} type="error" />
                 <IssueList title="Warnings" issues={warnings} type="warning" />
+              </div>
+
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  onClick={handleReset}
+                  className="jr-button-secondary w-full sm:w-auto"
+                >
+                  <RefreshCcw size={17} />
+                  Reset Data
+                </button>
+
+                <button
+                  onClick={handleSync}
+                  disabled={!canSync || isValidating || isSyncing}
+                  className="jr-button-primary w-full disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                >
+                  {isSyncing ? (
+                    <Loader2 size={17} className="animate-spin" />
+                  ) : (
+                    <CloudUpload size={17} />
+                  )}
+                  Sync ke Supabase
+                </button>
               </div>
             </div>
           )}

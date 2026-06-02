@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BarChart3,
   CalendarCheck2,
@@ -193,6 +193,7 @@ export default function OverviewDashboardPage() {
   const [appliedMonth, setAppliedMonth] = useState<DashboardMonthFilter>(5);
   const [activeTrendFunction, setActiveTrendFunction] =
     useState<TrendFunction>("PENDAPATAN");
+  const trendTabsRef = useRef<HTMLElement | null>(null);
 
   const [overview, setOverview] = useState<OverviewData | null>(null);
   const [comparison, setComparison] = useState<ComparisonData | null>(null);
@@ -263,6 +264,29 @@ export default function OverviewDashboardPage() {
 
     return () => window.clearTimeout(timeoutId);
   }, [appliedYear, appliedMonth]);
+
+  const [isTrendTabsSticky, setIsTrendTabsSticky] = useState(false);
+
+  useEffect(() => {
+    function updateStickyState() {
+      const tabs = trendTabsRef.current;
+      if (!tabs) return;
+
+      const nextIsSticky = tabs.getBoundingClientRect().top <= 0 && window.scrollY > 0;
+      setIsTrendTabsSticky((current) =>
+        current === nextIsSticky ? current : nextIsSticky
+      );
+    }
+
+    updateStickyState();
+    window.addEventListener("scroll", updateStickyState, { passive: true });
+    window.addEventListener("resize", updateStickyState);
+
+    return () => {
+      window.removeEventListener("scroll", updateStickyState);
+      window.removeEventListener("resize", updateStickyState);
+    };
+  }, []);
 
   const unitOptions = useMemo(() => {
     const options = new Map<string, { value: string; label: string }>();
@@ -441,7 +465,14 @@ export default function OverviewDashboardPage() {
               />
             </section>
 
-            <section className="flex flex-wrap gap-2">
+            <section
+              ref={trendTabsRef}
+              className={`sticky top-0 z-30 -mx-5 flex flex-wrap gap-2 bg-[#f5f7fb] px-5 transition-[padding,box-shadow,border-color] duration-150 ${
+                isTrendTabsSticky
+                  ? "border-b border-[#dce3ed] py-2"
+                  : "border-b border-transparent py-0"
+              }`}
+            >
               {trendFunctionOptions.map(({ value, label, Icon }) => {
                 const isActive = activeTrendFunction === value;
 
