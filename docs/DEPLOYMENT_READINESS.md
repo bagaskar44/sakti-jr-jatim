@@ -28,11 +28,13 @@ Jika project belum linked ke Supabase CLI, jalankan SQL melalui Supabase SQL Edi
 2. `supabase/migrations/202605310002_master_unit_dishub_dllaj.sql`
 3. `supabase/migrations/202605310003_backfill_dishub_dllaj_unit_types.sql`
 4. `supabase/migrations/202605310004_deactivate_iwkl_detail_source_units.sql`
+5. `supabase/migrations/202605310005_revenue_base_schema.sql`
 
-Prasyarat database yang sudah ada:
+Migration lokal sekarang mencakup:
+- Tabel profile auth: `profiles`.
 - Tabel pendapatan: `revenue_import_batches`, `revenue_swdkllj`, `revenue_iwkbu`, `revenue_iwkl`, `revenue_iwkl_details`, `revenue_sync_logs`.
 - View dashboard: `v_revenue_latest_batch`, `v_revenue_overview_monthly`, `v_revenue_source_composition`, `v_revenue_by_unit_monthly`, `v_revenue_swdkllj_monthly`, `v_revenue_iwkbu_monthly`, `v_revenue_iwkl_monthly`, `v_revenue_iwkl_detail_monthly`.
-- Tabel auth profile: `profiles` dengan kolom `id` dan `role`.
+- Tabel Master Unit: `master_units`, `master_unit_aliases`.
 
 Role yang dipakai aplikasi:
 - `ADMIN_KANWIL`: akses admin penuh, import, master unit, API admin.
@@ -118,7 +120,7 @@ Ekspektasi:
 Setelah deploy:
 
 1. Login berhasil dan redirect `next` bekerja hanya untuk path internal.
-2. Dashboard overview memuat KPI, distribusi, top unit, peta OpenStreetMap, dan tabel wilayah.
+2. Dashboard overview memuat KPI, analisis tren, top unit, peta OpenStreetMap, dan tabel wilayah.
 3. Marker peta muncul untuk unit aktif yang punya koordinat.
 4. Klik marker atau top unit masuk ke `/pendapatan` dengan unit terpilih.
 5. Halaman `/pendapatan` bisa drilldown `SWDKLLJ`, `IWKBU`, dan `IWKL`.
@@ -131,7 +133,7 @@ Setelah deploy:
 
 Detail kecil yang bisa dirapikan setelah progress utama selesai:
 
-- Migrasi schema revenue base ke migration lengkap jika ingin environment baru benar-benar bootstrap dari nol.
+- Uji migration lengkap di Supabase project fresh agar bootstrap dari nol benar-benar tervalidasi.
 - Tambah halaman khusus health/status internal jika dibutuhkan monitoring deployment.
 - Tambah pagination server-side untuk riwayat sync jika log sudah sangat banyak.
 - Rapikan microcopy, spacing, dan empty state setelah semua flow utama final.
