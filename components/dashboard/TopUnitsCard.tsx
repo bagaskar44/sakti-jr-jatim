@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { formatRupiah } from "@/lib/formatters";
+import {
+  getDashboardFunctionColor,
+  getFunctionDetailHref,
+  getUnitFunctionMetric,
+  type DashboardFunctionMetric,
+} from "@/lib/dashboard/function-metrics";
 
 type TopUnit = {
   unit_name: string;
@@ -9,58 +14,34 @@ type TopUnit = {
   total_revenue: number | string;
 };
 
-function getAmountBySource(unit: TopUnit, source: string) {
-  if (source === "SWDKLLJ") return Number(unit.swdkllj_total ?? 0);
-  if (source === "IWKBU") return Number(unit.iwkbu_total ?? 0);
-  if (source === "IWKL") return Number(unit.iwkl_total ?? 0);
-
-  return Number(unit.total_revenue ?? 0);
-}
-
-function getDetailHref({
-  unitName,
-  year,
-  month,
-  source,
-}: {
-  unitName: string;
-  year?: number;
-  month?: number | "ALL";
-  source: string;
-}) {
-  const params = new URLSearchParams();
-
-  if (year) params.set("year", String(year));
-  if (month) params.set("month", month === "ALL" ? "all" : String(month));
-  if (source !== "ALL") {
-    params.set("source", source);
-    params.set("tab", source);
-  }
-
-  params.set("unit", unitName);
-
-  return `/pendapatan?${params.toString()}`;
-}
-
 export function TopUnitsCard({
   units,
   source,
   year,
   month,
+  functionName = "PENDAPATAN",
   className = "",
 }: {
   units: TopUnit[];
   source: string;
   year?: number;
   month?: number | "ALL";
+  functionName?: DashboardFunctionMetric;
   className?: string;
 }) {
+  const barColor = getDashboardFunctionColor(functionName);
   const sortedUnits = [...units]
-    .sort((a, b) => getAmountBySource(b, source) - getAmountBySource(a, source))
+    .sort(
+      (a, b) =>
+        getUnitFunctionMetric({ unit: b, source, functionName }).primaryValue -
+        getUnitFunctionMetric({ unit: a, source, functionName }).primaryValue
+    )
     .slice(0, 5);
 
   const maxValue = Math.max(
-    ...sortedUnits.map((unit) => getAmountBySource(unit, source)),
+    ...sortedUnits.map(
+      (unit) => getUnitFunctionMetric({ unit, source, functionName }).primaryValue
+    ),
     1
   );
 
@@ -79,8 +60,8 @@ export function TopUnitsCard({
       className={`grid h-[370px] grid-rows-5 gap-4 px-1 py-5 ${className}`}
     >
       {sortedUnits.map((unit) => {
-        const amount = getAmountBySource(unit, source);
-        const width = `${Math.max((amount / maxValue) * 100, 12)}%`;
+        const metric = getUnitFunctionMetric({ unit, source, functionName });
+        const width = `${Math.max((metric.primaryValue / maxValue) * 100, 12)}%`;
 
         return (
           <div
@@ -89,11 +70,12 @@ export function TopUnitsCard({
           >
             <Link
               className="block min-w-0 whitespace-normal break-words border-r border-[#dce3ed] pr-3 text-right text-[12px] font-semibold leading-4 text-slate-700 hover:text-[#1f4fea]"
-              href={getDetailHref({
+              href={getFunctionDetailHref({
                 unitName: unit.unit_name,
                 year,
                 month,
                 source,
+                functionName,
               })}
             >
               {unit.unit_name}
@@ -101,13 +83,13 @@ export function TopUnitsCard({
 
             <div className="h-8 overflow-hidden rounded-[4px] bg-[#edf3ff]">
               <div
-                className="h-full rounded-[4px] bg-[#1f4fea]"
-                style={{ width }}
+                className="h-full rounded-[4px]"
+                style={{ backgroundColor: barColor, width }}
               />
             </div>
 
             <span className="whitespace-nowrap text-right text-[13px] font-bold tabular-nums text-slate-900">
-              {formatRupiah(amount)}
+              {metric.formattedPrimaryValue}
             </span>
           </div>
         );

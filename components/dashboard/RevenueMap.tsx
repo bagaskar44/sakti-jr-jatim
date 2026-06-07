@@ -25,6 +25,9 @@ export type RevenueMapProps = {
   year: number;
   month: number | "ALL";
   detailFunction: DashboardFunction;
+  className?: string;
+  selectedUnitId?: string | null;
+  onSelectedUnitChange?: (unit: RevenueMapUnit) => void;
 };
 
 const LeafletRevenueMap = dynamic<RevenueMapProps>(
@@ -32,7 +35,7 @@ const LeafletRevenueMap = dynamic<RevenueMapProps>(
   {
     ssr: false,
     loading: () => (
-      <div className="jr-state flex min-h-[430px] items-center justify-center text-sm font-semibold text-slate-500">
+      <div className="jr-state flex h-full min-h-[400px] w-full flex-1 items-center justify-center text-sm font-semibold text-slate-500">
         Memuat peta OpenStreetMap...
       </div>
     ),
@@ -42,7 +45,7 @@ const LeafletRevenueMap = dynamic<RevenueMapProps>(
 export function RevenueMap(props: RevenueMapProps) {
   if (props.units.length === 0) {
     return (
-      <div className="jr-state flex min-h-[320px] flex-col items-center justify-center border-dashed p-8 text-center">
+      <div className="jr-state flex h-full min-h-[400px] w-full flex-1 flex-col items-center justify-center border-dashed p-8 text-center">
         <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[7px] bg-blue-50 text-blue-700">
           <MapPinned size={28} />
         </div>

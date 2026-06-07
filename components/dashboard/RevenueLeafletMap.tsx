@@ -11,14 +11,13 @@ import {
   Tooltip,
   useMap,
 } from "react-leaflet";
-import { Activity, Camera, ExternalLink, MapPin } from "lucide-react";
+import { ExternalLink, MapPin } from "lucide-react";
 import { formatNumber, formatRupiah } from "@/lib/formatters";
 import type {
   DashboardFunction,
   RevenueMapProps,
   RevenueMapUnit,
 } from "./RevenueMap";
-import { getActivityFunctionBadgeClass } from "./activityBadgeStyles";
 
 function toNumber(value: number | string | null | undefined) {
   const result = Number(value ?? 0);
@@ -108,6 +107,15 @@ function getDetailPath(detailFunction: DashboardFunction) {
   return "/pendapatan";
 }
 
+function toTitleCase(value: string) {
+  return value
+    .toLowerCase()
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 function getUnitDetailHref({
   unit,
   year,
@@ -135,24 +143,65 @@ function getUnitDetailHref({
   return `${getDetailPath(detailFunction)}?${params.toString()}`;
 }
 
-function getLatestActivities(unit: RevenueMapUnit | null) {
-  const unitLabel = unit?.unit_name ?? "Unit terpilih";
+function getDetailMetrics({
+  unit,
+  source,
+  detailFunction,
+}: {
+  unit: RevenueMapUnit;
+  source: string;
+  detailFunction: DashboardFunction;
+}) {
+  if (detailFunction === "PELAYANAN") {
+    return [
+      {
+        label: "Total Pelayanan",
+        value: formatNumber(getStaticPelayanan(unit)),
+      },
+      {
+        label: "SLA",
+        value: "96,4%",
+      },
+      {
+        label: "Layanan Selesai",
+        value: formatNumber(getStaticPelayanan(unit) - 6),
+      },
+    ];
+  }
+
+  if (detailFunction === "KECELAKAAN") {
+    return [
+      {
+        label: "Total Kecelakaan",
+        value: formatNumber(getStaticKecelakaan(unit)),
+      },
+      {
+        label: "Santunan Proses",
+        value: formatNumber(2 + (unit.unit_name.length % 4)),
+      },
+      {
+        label: "SLA",
+        value: "93,8%",
+      },
+    ];
+  }
 
   return [
     {
-      title: "Sosialisasi Tertib Lalu Lintas",
-      functionLabel: "Kecelakaan",
-      description: `${unitLabel} melakukan edukasi keselamatan berkendara.`,
+      label: source === "ALL" ? "Total Pendapatan" : source,
+      value: formatRupiah(getAmountBySource(unit, source)),
     },
     {
-      title: "Monitoring Layanan Santunan",
-      functionLabel: "Pelayanan",
-      description: `${unitLabel} melakukan pemantauan penyelesaian layanan.`,
+      label: "SWDKLLJ",
+      value: formatRupiah(unit.swdkllj_total),
     },
     {
-      title: "Rekonsiliasi Data Pendapatan",
-      functionLabel: "Pendapatan",
-      description: `${unitLabel} melakukan pengecekan data pendapatan periodik.`,
+      label: "IWKBU",
+      value: formatRupiah(unit.iwkbu_total),
+    },
+    {
+      label: "IWKL",
+      value: formatRupiah(unit.iwkl_total),
     },
   ];
 }
@@ -219,8 +268,15 @@ export default function RevenueLeafletMap({
   year,
   month,
   detailFunction,
+  className = "",
+  selectedUnitId,
+  onSelectedUnitChange,
 }: RevenueMapProps) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [internalSelectedId, setInternalSelectedId] = useState<string | null>(
+    null
+  );
+  const selectedId =
+    selectedUnitId === undefined ? internalSelectedId : selectedUnitId;
 
   const sortedUnits = useMemo(() => {
     return [...units].sort(
@@ -229,7 +285,10 @@ export default function RevenueLeafletMap({
   }, [units, source]);
 
   const selectedUnit =
-    units.find((unit) => unit.id === selectedId) ?? sortedUnits[0] ?? null;
+    selectedId === null
+      ? null
+      : units.find((unit) => unit.id === selectedId) ?? null;
+  const mapFocusUnit = selectedUnit ?? sortedUnits[0] ?? null;
   const maxAmount = Math.max(
     ...units.map((unit) => getAmountBySource(unit, source)),
     1
@@ -240,170 +299,135 @@ export default function RevenueLeafletMap({
     return units.map((unit) => [unit.latitude, unit.longitude]);
   }, [units]);
   const initialCenter = useMemo<LatLngExpression>(() => {
-    if (selectedUnit) return getPosition(selectedUnit);
+    if (mapFocusUnit) return getPosition(mapFocusUnit);
 
     return [-7.5361, 112.2384];
-  }, [selectedUnit]);
-  const selectedForPan =
-    selectedId === null
-      ? null
-      : units.find((unit) => unit.id === selectedId) ?? null;
+  }, [mapFocusUnit]);
+
+  function handleMarkerSelect(unit: RevenueMapUnit) {
+    if (selectedUnitId === undefined) {
+      setInternalSelectedId(unit.id);
+    }
+
+    onSelectedUnitChange?.(unit);
+  }
 
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_330px]">
-      <div className="relative min-h-[430px] overflow-hidden rounded-[8px] border border-[#dce3ed] bg-slate-100 shadow-[0_2px_8px_rgba(15,23,42,0.1)]">
-        <MapContainer
-          center={initialCenter}
-          className="revenue-leaflet-map h-full min-h-[430px] w-full"
-          scrollWheelZoom
-          zoom={units.length > 1 ? 8 : 10}
-          zoomControl
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
+    <div
+      className={`relative h-full min-h-[400px] w-full flex-1 overflow-hidden rounded-[8px] border border-[#dce3ed] bg-slate-100 shadow-[0_2px_8px_rgba(15,23,42,0.1)] ${className}`}
+    >
+      <MapContainer
+        center={initialCenter}
+        className="revenue-leaflet-map absolute inset-0 h-full min-h-0 w-full"
+        scrollWheelZoom
+        zoom={units.length > 1 ? 8 : 10}
+        zoomControl
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
-          <FitBounds bounds={bounds} />
-          <InvalidateMapSize />
-          <PanToSelected unit={selectedForPan} />
+        <FitBounds bounds={bounds} />
+        <InvalidateMapSize />
+        <PanToSelected unit={selectedUnit} />
 
-          {units.map((unit) => {
-            const amount = getAmountBySource(unit, source);
-            const selected = selectedUnit?.id === unit.id;
-            const size = getMarkerSize(unit, source, maxAmount);
+        {units.map((unit) => {
+          const selected = selectedUnit?.id === unit.id;
+          const size = getMarkerSize(unit, source, maxAmount);
+          const popupMetrics = getDetailMetrics({
+            unit,
+            source,
+            detailFunction,
+          });
+          const primaryMetric = popupMetrics[0];
+          const secondaryMetrics = popupMetrics.slice(1);
 
-            return (
-              <Marker
-                eventHandlers={{
-                  click: () => setSelectedId(unit.id),
-                }}
-                icon={createMarkerIcon(unit, size, selected)}
-                key={unit.id}
-                position={getPosition(unit)}
-                riseOnHover
-                zIndexOffset={selected ? 120 : 0}
+          return (
+            <Marker
+              eventHandlers={{
+                click: () => handleMarkerSelect(unit),
+              }}
+              icon={createMarkerIcon(unit, size, selected)}
+              key={unit.id}
+              position={getPosition(unit)}
+              riseOnHover
+              zIndexOffset={selected ? 120 : 0}
+            >
+              <Tooltip direction="top" offset={[0, -size / 2]}>
+                <span className="text-xs font-bold">{unit.unit_name}</span>
+              </Tooltip>
+              <Popup
+                className="revenue-unit-popup"
+                closeButton={false}
+                maxWidth={310}
+                minWidth={300}
+                offset={[0, -size / 2]}
               >
-                <Tooltip direction="top" offset={[0, -size / 2]}>
-                  <span className="text-xs font-bold">{unit.unit_name}</span>
-                </Tooltip>
-                <Popup
-                  className="revenue-unit-popup"
-                  closeButton={false}
-                  maxWidth={300}
-                  minWidth={300}
-                  offset={[0, -size / 2]}
-                >
-                  <div className="w-full text-slate-900">
-                    <div className="flex h-25 items-center justify-center rounded-[7px] border border-dashed border-[#dce3ed] bg-[#f8fafc] px-2 text-center text-[11px] font-semibold text-slate-500">
-                      <Camera size={14} className="mr-1.5 text-slate-400" />
-                      <span>In Update...</span>
-                    </div>
-
-                    <div className="mt-2 text-center">
-                      <h3 className="break-words text-[13px] font-bold leading-tight">
-                        {unit.unit_name}
-                      </h3>
-                    </div>
-
-                    <div className="mt-2 grid grid-cols-3 gap-2 border-y border-[#e5edf6] py-1.5">
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-semibold leading-4 text-slate-500">
-                          Pendapatan
-                        </p>
-                        <p className="mt-0.5 truncate text-xs font-bold text-slate-950">
-                          {formatRupiah(amount)}
-                        </p>
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-semibold leading-4 text-slate-500">
-                          Pelayanan
-                        </p>
-                        <p className="mt-0.5 truncate text-xs font-bold text-slate-950">
-                          {formatNumber(getStaticPelayanan(unit))}
-                        </p>
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-semibold leading-4 text-slate-500">
-                          Kecelakaan
-                        </p>
-                        <p className="mt-0.5 truncate text-xs font-bold text-slate-950">
-                          {formatNumber(getStaticKecelakaan(unit))}
-                        </p>
-                      </div>
-                    </div>
-
-                    <Link
-                      href={getUnitDetailHref({
-                        unit,
-                        year,
-                        month,
-                        source,
-                        detailFunction,
-                      })}
-                      prefetch={false}
-                      className="mt-2 inline-flex min-h-8 w-full items-center justify-center gap-1.5 rounded-[7px] bg-[#1f4fea] px-3 py-1.5 text-xs font-bold !text-white shadow-sm hover:bg-blue-700"
-                    >
-                      Lihat Detail {getDetailFunctionLabel(detailFunction)}
-                      <ExternalLink size={13} />
-                    </Link>
+                <div className="w-full text-[#07113b]">
+                  <div className="border-b border-[#cfe0ff] pb-2">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#1f4fea]">
+                      Detail {getDetailFunctionLabel(detailFunction)}
+                    </p>
+                    <h3 className="mt-1 break-words text-base font-bold leading-tight text-[#07113b]">
+                      {toTitleCase(unit.unit_name)}
+                    </h3>
                   </div>
-                </Popup>
-              </Marker>
-            );
-          })}
-        </MapContainer>
 
-        <div className="pointer-events-none absolute left-3 top-3 z-[500] rounded-[7px] border border-[#dce3ed] bg-white/95 px-3 py-2 shadow-sm backdrop-blur">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-600">
-            <MapPin size={14} className="text-blue-700" />
-            OpenStreetMap
-          </div>
+                  {primaryMetric && (
+                    <div className="mt-2 rounded-[7px] bg-[#eef5ff] px-2.5 py-1.5">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.08em] text-[#1f4fea]">
+                        {primaryMetric.label}
+                      </p>
+                      <p className="mt-1 break-words text-lg font-bold leading-none text-[#1f4fea]">
+                        {primaryMetric.value}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="mt-2 divide-y divide-[#dce8ff]">
+                    {secondaryMetrics.map((metric) => (
+                      <div
+                        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 py-1.5"
+                        key={metric.label}
+                      >
+                        <p className="min-w-0 break-words text-[11px] font-bold uppercase tracking-[0.04em] text-[#1f4fea]">
+                          {metric.label}
+                        </p>
+                        <p className="text-right text-xs font-bold text-[#07113b]">
+                          {metric.value}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Link
+                    href={getUnitDetailHref({
+                      unit,
+                      year,
+                      month,
+                      source,
+                      detailFunction,
+                    })}
+                    prefetch={false}
+                    className="mt-2 inline-flex min-h-7 w-full items-center justify-center gap-1 rounded-[7px] bg-[#1f4fea] px-2.5 text-[12px] font-bold !text-white shadow-sm hover:bg-blue-700"
+                  >
+                    Lihat Detail {getDetailFunctionLabel(detailFunction)}
+                    <ExternalLink size={10} />
+                  </Link>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MapContainer>
+
+      <div className="pointer-events-none absolute left-3 top-3 z-[500] rounded-[7px] border border-[#dce3ed] bg-white/95 px-3 py-2 shadow-sm backdrop-blur">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-600">
+          <MapPin size={14} className="text-blue-700" />
+          OpenStreetMap
         </div>
       </div>
-
-      <aside className="space-y-3">
-        <div>
-          <p className="text-sm font-bold text-slate-950">Kegiatan Terbaru</p>
-          <p className="mt-1 text-xs font-semibold text-slate-500">
-            {selectedUnit?.unit_name ?? "Pilih marker untuk melihat fokus unit"}
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          {getLatestActivities(selectedUnit).map((activity) => (
-            <div
-              className="rounded-[8px] border border-[#dce3ed] bg-white p-3"
-              key={`${activity.functionLabel}-${activity.title}`}
-            >
-              <div className="mb-2 flex items-start justify-between gap-3">
-                <p className="text-sm font-bold leading-tight text-slate-950">
-                  {activity.title}
-                </p>
-                <span
-                  className={`shrink-0 rounded-full border px-2 py-1 text-[11px] font-bold ${getActivityFunctionBadgeClass(activity.functionLabel)}`}
-                >
-                  {activity.functionLabel}
-                </span>
-              </div>
-              <p className="text-xs font-semibold leading-5 text-slate-500">
-                {activity.description}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <div className="rounded-[8px] border border-dashed border-[#dce3ed] bg-[#f8fafc] p-3 text-xs font-semibold text-slate-500">
-          <div className="mb-2 flex items-center gap-2 text-slate-700">
-            <Activity size={14} className="text-blue-700" />
-            Static preview
-          </div>
-          Kegiatan terbaru masih data sementara sampai modul kegiatan unit
-          tersedia.
-        </div>
-      </aside>
     </div>
   );
 }

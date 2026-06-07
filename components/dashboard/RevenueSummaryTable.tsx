@@ -1,5 +1,11 @@
 import { ExternalLink } from "lucide-react";
-import { formatPercent, formatRupiah } from "@/lib/formatters";
+import type { ReactNode } from "react";
+import {
+  getFunctionDetailHref,
+  getUnitFunctionMetric,
+  type DashboardFunctionMetric,
+} from "@/lib/dashboard/function-metrics";
+import { formatPercent } from "@/lib/formatters";
 
 type UnitRow = {
   unit_name: string;
@@ -9,37 +15,28 @@ type UnitRow = {
   total_revenue: number | string;
 };
 
-function getAmountBySource(unit: UnitRow, source: string) {
-  if (source === "SWDKLLJ") return Number(unit.swdkllj_total ?? 0);
-  if (source === "IWKBU") return Number(unit.iwkbu_total ?? 0);
-  if (source === "IWKL") return Number(unit.iwkl_total ?? 0);
-
-  return Number(unit.total_revenue ?? 0);
-}
-
-function getDetailHref({
-  unitName,
-  year,
-  month,
-  source,
-}: {
-  unitName: string;
-  year?: number;
-  month?: number | "ALL";
-  source: string;
-}) {
-  const params = new URLSearchParams();
-
-  if (year) params.set("year", String(year));
-  if (month) params.set("month", month === "ALL" ? "all" : String(month));
-  if (source !== "ALL") {
-    params.set("source", source);
-    params.set("tab", source);
+function getSummaryColumnLabels(functionName: DashboardFunctionMetric) {
+  if (functionName === "PELAYANAN") {
+    return {
+      primary: "Total Pelayanan",
+      details: ["SLA", "Layanan Selesai"],
+      minWidthClass: "min-w-[760px]",
+    };
   }
 
-  params.set("unit", unitName);
+  if (functionName === "KECELAKAAN") {
+    return {
+      primary: "Total Kecelakaan",
+      details: ["Santunan Proses", "SLA"],
+      minWidthClass: "min-w-[760px]",
+    };
+  }
 
-  return `/pendapatan?${params.toString()}`;
+  return {
+    primary: "Total",
+    details: ["SWDKLLJ", "IWKBU", "IWKL"],
+    minWidthClass: "min-w-[900px]",
+  };
 }
 
 export function RevenueSummaryTable({
@@ -47,69 +44,86 @@ export function RevenueSummaryTable({
   source,
   year,
   month,
+  limit = 10,
+  footerAction,
+  functionName = "PENDAPATAN",
 }: {
   units: UnitRow[];
   source: string;
   year?: number;
   month?: number | "ALL";
+  limit?: number;
+  footerAction?: ReactNode;
+  functionName?: DashboardFunctionMetric;
 }) {
-  const sortedUnits = [...units]
-    .sort((a, b) => getAmountBySource(b, source) - getAmountBySource(a, source))
-    .slice(0, 10);
+  const columns = getSummaryColumnLabels(functionName);
+  const sortedUnits = [...units].sort(
+    (a, b) =>
+      getUnitFunctionMetric({ unit: b, source, functionName }).primaryValue -
+      getUnitFunctionMetric({ unit: a, source, functionName }).primaryValue
+  );
+  const displayedUnits = sortedUnits.slice(0, limit);
 
   const total = sortedUnits.reduce(
-    (sum, unit) => sum + getAmountBySource(unit, source),
+    (sum, unit) =>
+      sum + getUnitFunctionMetric({ unit, source, functionName }).primaryValue,
     0
   );
 
   return (
     <div className="jr-table-shell">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px] border-collapse text-left text-sm">
+        <table
+          className={`w-full ${columns.minWidthClass} border-collapse text-left text-sm`}
+        >
           <thead className="jr-table-head">
             <tr>
               <th className="px-4 py-3 font-bold">Unit/Kantor</th>
-              <th className="px-4 py-3 font-bold">SWDKLLJ</th>
-              <th className="px-4 py-3 font-bold">IWKBU</th>
-              <th className="px-4 py-3 font-bold">IWKL</th>
-              <th className="px-4 py-3 font-bold">Total</th>
+              {columns.details.map((label) => (
+                <th className="px-4 py-3 font-bold" key={label}>
+                  {label}
+                </th>
+              ))}
+              <th className="px-4 py-3 font-bold">{columns.primary}</th>
               <th className="px-4 py-3 font-bold">Kontribusi</th>
               <th className="px-4 py-3 font-bold">Aksi</th>
             </tr>
           </thead>
 
           <tbody className="divide-y divide-slate-100 bg-white">
-            {sortedUnits.map((unit) => {
-              const selectedAmount = getAmountBySource(unit, source);
-              const contribution = total > 0 ? (selectedAmount / total) * 100 : 0;
+            {displayedUnits.map((unit) => {
+              const metric = getUnitFunctionMetric({
+                unit,
+                source,
+                functionName,
+              });
+              const contribution =
+                total > 0 ? (metric.primaryValue / total) * 100 : 0;
 
               return (
                 <tr key={unit.unit_name} className="hover:bg-[#f8fafc]">
                   <td className="px-4 py-3 font-semibold text-slate-900">
                     {unit.unit_name}
                   </td>
-                  <td className="px-4 py-3 text-slate-700">
-                    {formatRupiah(unit.swdkllj_total)}
-                  </td>
-                  <td className="px-4 py-3 text-slate-700">
-                    {formatRupiah(unit.iwkbu_total)}
-                  </td>
-                  <td className="px-4 py-3 text-slate-700">
-                    {formatRupiah(unit.iwkl_total)}
-                  </td>
+                  {metric.details.map((detail) => (
+                    <td className="px-4 py-3 text-slate-700" key={detail.label}>
+                      {detail.formattedValue}
+                    </td>
+                  ))}
                   <td className="px-4 py-3 font-bold text-slate-900">
-                    {formatRupiah(unit.total_revenue)}
+                    {metric.formattedPrimaryValue}
                   </td>
                   <td className="px-4 py-3 text-slate-700">
                     {formatPercent(contribution)}
                   </td>
                   <td className="px-4 py-3">
                     <a
-                      href={getDetailHref({
+                      href={getFunctionDetailHref({
                         unitName: unit.unit_name,
                         year,
                         month,
                         source,
+                        functionName,
                       })}
                       className="inline-flex items-center gap-1 rounded-[7px] border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
                     >
@@ -124,8 +138,11 @@ export function RevenueSummaryTable({
         </table>
       </div>
 
-      <div className="border-t border-[#dce3ed] bg-[#f8fafc] px-4 py-3 text-xs text-slate-500">
-        Menampilkan {sortedUnits.length} unit teratas.
+      <div className="flex flex-col gap-3 border-t border-[#dce3ed] bg-[#f8fafc] px-4 py-3 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+        <span>
+          Menampilkan {displayedUnits.length} dari {sortedUnits.length} unit.
+        </span>
+        {footerAction}
       </div>
     </div>
   );

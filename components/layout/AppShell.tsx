@@ -26,22 +26,22 @@ type AppRole = "ADMIN_KANWIL" | "VIEWER" | "ADMIN_LOKET";
 
 const mainMenu = [
   {
-    label: "Overview",
+    label: "Dashboard Overview",
     href: "/",
     icon: LayoutDashboard,
   },
   {
-    label: "Pendapatan",
+    label: "Dashboard Pendapatan",
     href: "/pendapatan",
     icon: WalletCards,
   },
   {
-    label: "Pelayanan",
+    label: "Dashboard Pelayanan",
     href: "/pelayanan",
     icon: Users,
   },
   {
-    label: "Kecelakaan",
+    label: "Dashboard Kecelakaan",
     href: "/kecelakaan",
     icon: AlertCircle,
   },

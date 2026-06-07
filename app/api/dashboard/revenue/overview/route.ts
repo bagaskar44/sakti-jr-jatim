@@ -37,7 +37,14 @@ type UnitRow = {
 
 type TrendRow = {
   period_month: number | string;
+  swdkllj_total?: number | string | null;
+  iwkbu_total?: number | string | null;
+  iwkl_total?: number | string | null;
   total_revenue: number | string | null;
+};
+
+type UnitTrendRow = TrendRow & {
+  unit_name: string;
 };
 
 const MONTH_LABELS = [
@@ -73,6 +80,26 @@ const SHORT_MONTH_LABELS = [
 function toNumber(value: unknown) {
   const result = Number(value ?? 0);
   return Number.isNaN(result) ? 0 : result;
+}
+
+function normalizeDashboardUnitName(value: unknown) {
+  const normalized = String(value ?? "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toUpperCase();
+
+  if (normalized === "LOKET KANTOR WILAYAH JAWA TIMUR") {
+    return "KANTOR WILAYAH JAWA TIMUR";
+  }
+
+  if (
+    normalized.startsWith("LOKET KANTOR CABANG ") ||
+    normalized.startsWith("LOKET KANTOR PELAYANAN ")
+  ) {
+    return normalized.replace("LOKET ", "");
+  }
+
+  return normalized;
 }
 
 function getMonthLabel(month: number) {
@@ -269,18 +296,63 @@ function aggregateUnits(rows: UnitRow[]) {
   );
 }
 
+function createEmptyTrendTotals() {
+  return {
+    swdkllj_total: 0,
+    iwkbu_total: 0,
+    iwkl_total: 0,
+    total_revenue: 0,
+  };
+}
+
+function addTrendTotals(
+  current: ReturnType<typeof createEmptyTrendTotals>,
+  row: TrendRow
+) {
+  current.swdkllj_total += toNumber(row.swdkllj_total);
+  current.iwkbu_total += toNumber(row.iwkbu_total);
+  current.iwkl_total += toNumber(row.iwkl_total);
+  current.total_revenue += toNumber(row.total_revenue);
+}
+
 function buildTrend(rows: TrendRow[], months: number[]) {
-  const byMonth = new Map<number, number>();
+  const byMonth = new Map<number, ReturnType<typeof createEmptyTrendTotals>>();
 
   for (const row of rows) {
-    byMonth.set(Number(row.period_month), toNumber(row.total_revenue));
+    const month = Number(row.period_month);
+    const current = byMonth.get(month) ?? createEmptyTrendTotals();
+
+    addTrendTotals(current, row);
+    byMonth.set(month, current);
   }
 
   return months.map((month) => ({
     month,
     label: getShortMonthLabel(month),
-    total_revenue: byMonth.get(month) ?? 0,
+    ...(byMonth.get(month) ?? createEmptyTrendTotals()),
   }));
+}
+
+function buildUnitTrends(rows: UnitTrendRow[], months: number[]) {
+  const byUnit = new Map<string, UnitTrendRow[]>();
+
+  for (const row of rows) {
+    const unitName = normalizeDashboardUnitName(row.unit_name);
+
+    if (!unitName) continue;
+
+    const unitRows = byUnit.get(unitName) ?? [];
+
+    unitRows.push(row);
+    byUnit.set(unitName, unitRows);
+  }
+
+  return Array.from(byUnit.entries())
+    .map(([unit_name, unitRows]) => ({
+      unit_name,
+      trend: buildTrend(unitRows, months),
+    }))
+    .sort((a, b) => a.unit_name.localeCompare(b.unit_name, "id-ID"));
 }
 
 function getTrendDisplayMonths(rows: TrendRow[], months: number[]) {
@@ -389,7 +461,9 @@ export async function GET(request: Request) {
 
     const { data: trendRows, error: trendError } = await supabase
       .from("v_revenue_overview_monthly")
-      .select("period_month, total_revenue")
+      .select(
+        "period_month, swdkllj_total, iwkbu_total, iwkl_total, total_revenue"
+      )
       .eq("period_year", periodYear)
       .in("period_month", trendMonths)
       .order("period_month", { ascending: true });
@@ -402,6 +476,19 @@ export async function GET(request: Request) {
       (trendRows ?? []) as TrendRow[],
       trendMonths
     );
+
+    const { data: unitTrendRows, error: unitTrendError } = await supabase
+      .from("v_revenue_by_unit_monthly")
+      .select(
+        "period_month, unit_name, swdkllj_total, iwkbu_total, iwkl_total, total_revenue"
+      )
+      .eq("period_year", periodYear)
+      .in("period_month", trendDisplayMonths)
+      .order("period_month", { ascending: true });
+
+    if (unitTrendError) {
+      throw new Error(unitTrendError.message);
+    }
 
     const comparisonGrowthPct = calculateGrowthPct(
       overview.total_revenue,
@@ -435,6 +522,10 @@ export async function GET(request: Request) {
       composition: aggregateComposition((composition ?? []) as CompositionRow[]),
       top_units: aggregateUnits((topUnits ?? []) as UnitRow[]).slice(0, 10),
       trend: buildTrend((trendRows ?? []) as TrendRow[], trendDisplayMonths),
+      unit_trends: buildUnitTrends(
+        (unitTrendRows ?? []) as UnitTrendRow[],
+        trendDisplayMonths
+      ),
     });
   } catch (error) {
     return NextResponse.json(

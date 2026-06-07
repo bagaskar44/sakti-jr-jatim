@@ -166,7 +166,7 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   height: 100%;
   isolation: isolate;
-  min-height: 430px;
+  min-height: 0;
   width: 100%;
 }
 
@@ -185,8 +185,8 @@ body {
 }
 
 .revenue-leaflet-map .revenue-unit-popup .leaflet-popup-content {
-  max-width: 300px !important;
-  width: 300px !important;
+  max-width: min(310px, calc(100vw - 56px)) !important;
+  width: min(310px, calc(100vw - 56px)) !important;
 }
 
 .revenue-leaflet-map .revenue-unit-popup p,

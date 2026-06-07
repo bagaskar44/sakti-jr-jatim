@@ -936,17 +936,14 @@ export default function ImportPendapatanPage() {
           </div>
 
           {validateResult && (
-            <div className="mt-5 space-y-4 border-t border-[#e5edf6] pt-5">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h3 className="text-base font-bold text-slate-950">
-                    Status Validasi
-                  </h3>
-                  <p className="mt-1 text-sm font-semibold text-slate-500">
-                    Hasil pengecekan struktur dan isi Google Sheets.
-                  </p>
-                </div>
-                <StatusBadge status={validationStatus} />
+            <div className="mt-5 space-y-4">
+              {/* ── Divider: Labeled divider Status Validasi ── */}
+              <div className="relative flex items-center gap-3 py-1">
+                <div className="h-px flex-1 bg-[#e5edf6]" />
+                <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                  Hasil Validasi
+                </span>
+                <div className="h-px flex-1 bg-[#e5edf6]" />
               </div>
 
               <div
@@ -1025,7 +1022,7 @@ export default function ImportPendapatanPage() {
                   ) : (
                     <CloudUpload size={17} />
                   )}
-                  Sync ke Supabase
+                  Sync ke Database
                 </button>
               </div>
             </div>
