@@ -6,6 +6,9 @@ import { AppShell } from "@/components/layout/AppShell";
 export const metadata: Metadata = {
   title: "SAKTI JR-JATIM",
   description: "Dashboard monitoring Jasa Raharja Jawa Timur",
+  icons: {
+    icon: "/images/logo-jasa-raharja.png",
+  },
 };
 
 export default function RootLayout({

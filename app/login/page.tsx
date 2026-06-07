@@ -188,7 +188,7 @@ export default function LoginPage() {
                   type="text"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  placeholder="admin"
+                  placeholder="Masukkan username"
                   autoComplete="username"
                   required
                   className="min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-950 outline-none placeholder:text-slate-400"
@@ -272,7 +272,7 @@ export default function LoginPage() {
           </form>
 
           <p className="mt-7 text-center text-xs font-medium text-slate-400">
-            Credential prototype: admin / admin123.
+            Credential prototype: admin@example.com / admin123.
           </p>
         </div>
       </section>
