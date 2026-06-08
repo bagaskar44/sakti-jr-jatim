@@ -11,7 +11,7 @@ import {
   Tooltip,
   useMap,
 } from "react-leaflet";
-import { ExternalLink, MapPin } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { formatNumber, formatRupiah } from "@/lib/formatters";
 import type {
   DashboardFunction,
@@ -421,13 +421,6 @@ export default function RevenueLeafletMap({
           );
         })}
       </MapContainer>
-
-      <div className="pointer-events-none absolute left-3 top-3 z-[500] rounded-[5.6px] border border-[#dce3ed] bg-white/95 px-3 py-2 shadow-sm backdrop-blur">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-600">
-          <MapPin size={11.2} className="text-blue-700" />
-          OpenStreetMap
-        </div>
-      </div>
     </div>
   );
 }
