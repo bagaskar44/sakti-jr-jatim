@@ -53,10 +53,10 @@ export function FunctionTrendChart({
       <text
         x={textX}
         y={textY}
-        dy={4}
+        dy={3.2}
         textAnchor="end"
         fill="#64748b"
-        fontSize={12}
+        fontSize={9.6}
         fontWeight={700}
       >
         {tickFormatter(Number(payload?.value ?? 0))}
@@ -66,23 +66,23 @@ export function FunctionTrendChart({
 
   if (!hasData) {
     return (
-      <div className="flex h-[370px] items-center justify-center rounded-[8px] border border-dashed border-[#dce3ed] bg-[#f8fafc] text-sm font-semibold text-slate-500">
+      <div className="flex h-[296px] items-center justify-center rounded-[6.4px] border border-dashed border-[#dce3ed] bg-[#f8fafc] text-sm font-semibold text-slate-500">
         Belum ada data tren untuk tahun terpilih.
       </div>
     );
   }
 
   return (
-    <div className="h-[370px]">
+    <div className="h-[296px]">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={normalizedData}
-          margin={{ top: 8, right: 8, bottom: 4, left: 0 }}
+          margin={{ top: 6.4, right: 6.4, bottom: 3.2, left: 0 }}
         >
-          <CartesianGrid stroke="#e5edf6" strokeDasharray="3 5" />
+          <CartesianGrid stroke="#e5edf6" strokeDasharray="2.4 4" />
           <XAxis
             dataKey="label"
-            tick={{ fill: "#64748b", fontSize: 12, fontWeight: 700 }}
+            tick={{ fill: "#64748b", fontSize: 9.6, fontWeight: 700 }}
             axisLine={false}
             tickLine={false}
           />
@@ -90,7 +90,7 @@ export function FunctionTrendChart({
             tick={renderYAxisTick}
             axisLine={false}
             tickLine={false}
-            width={76}
+            width={60.8}
           />
           <Tooltip
             formatter={(value) => [
@@ -99,9 +99,9 @@ export function FunctionTrendChart({
             ]}
             labelFormatter={(label) => `Bulan ${label}`}
             contentStyle={{
-              borderRadius: 8,
+              borderRadius: 6.4,
               borderColor: "#dce3ed",
-              boxShadow: "0 10px 24px rgba(15, 23, 42, 0.12)",
+              boxShadow: "0 8px 19.2px rgba(15, 23, 42, 0.12)",
               fontWeight: 700,
             }}
           />
@@ -110,9 +110,9 @@ export function FunctionTrendChart({
             dataKey="value"
             name={valueLabel}
             stroke={color}
-            strokeWidth={2}
-            dot={{ r: 3, strokeWidth: 2, fill: "#ffffff" }}
-            activeDot={{ r: 5, strokeWidth: 2 }}
+            strokeWidth={1.6}
+            dot={{ r: 2.4, strokeWidth: 1.6, fill: "#ffffff" }}
+            activeDot={{ r: 4, strokeWidth: 1.6 }}
           />
         </LineChart>
       </ResponsiveContainer>

@@ -148,12 +148,12 @@ function toFormState(unit: MasterUnit): FormState {
 function StatusPill({ active }: { active: boolean }) {
   return active ? (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-      <CheckCircle2 size={13} />
+      <CheckCircle2 size={10.4} />
       Aktif
     </span>
   ) : (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-      <XCircle size={13} />
+      <XCircle size={10.4} />
       Nonaktif
     </span>
   );
@@ -172,7 +172,7 @@ function MessageBox({
       : "border-red-200 bg-red-50 text-red-700";
 
   return (
-    <div className={`rounded-[8px] border px-4 py-3 text-sm font-semibold ${tone}`}>
+    <div className={`rounded-[6.4px] border px-4 py-3 text-sm font-semibold ${tone}`}>
       {message}
     </div>
   );
@@ -428,11 +428,11 @@ export default function MasterUnitPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-slate-500">Total</p>
-                <p className="mt-1 text-2xl font-bold text-slate-950">
+                <p className="mt-1 text-xl font-bold text-slate-950">
                   {units.length}
                 </p>
               </div>
-              <Database className="text-blue-700" size={24} />
+              <Database className="text-blue-700" size={19.2} />
             </div>
           </div>
 
@@ -440,11 +440,11 @@ export default function MasterUnitPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-slate-500">Aktif</p>
-                <p className="mt-1 text-2xl font-bold text-emerald-700">
+                <p className="mt-1 text-xl font-bold text-emerald-700">
                   {activeCount}
                 </p>
               </div>
-              <CheckCircle2 className="text-emerald-600" size={24} />
+              <CheckCircle2 className="text-emerald-600" size={19.2} />
             </div>
           </div>
 
@@ -454,11 +454,11 @@ export default function MasterUnitPage() {
                 <p className="text-xs font-semibold text-slate-500">
                   Nonaktif
                 </p>
-                <p className="mt-1 text-2xl font-bold text-slate-700">
+                <p className="mt-1 text-xl font-bold text-slate-700">
                   {inactiveCount}
                 </p>
               </div>
-              <AlertTriangle className="text-orange-600" size={24} />
+              <AlertTriangle className="text-orange-600" size={19.2} />
             </div>
           </div>
         </div>
@@ -577,7 +577,7 @@ export default function MasterUnitPage() {
                     }))
                   }
                   rows={1}
-                  className="jr-field mt-2 h-[46px] min-h-[46px] resize-none overflow-hidden py-3"
+                  className="jr-field mt-2 h-[36.8px] min-h-[36.8px] resize-none overflow-hidden py-3"
                 />
               </div>
             </div>
@@ -589,7 +589,7 @@ export default function MasterUnitPage() {
                   setForm(emptyForm);
                   setMessage(null);
                 }}
-                className="jr-button-secondary min-w-[116px]"
+                className="jr-button-secondary min-w-[92.8px]"
               >
                 Reset Form
               </button>
@@ -597,12 +597,12 @@ export default function MasterUnitPage() {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="jr-button-primary min-w-[116px]"
+                className="jr-button-primary min-w-[92.8px]"
               >
                 {isSaving ? (
-                  <Loader2 size={17} className="animate-spin" />
+                  <Loader2 size={13.6} className="animate-spin" />
                 ) : (
-                  <Save size={17} />
+                  <Save size={13.6} />
                 )}
                 Simpan
               </button>
@@ -619,12 +619,12 @@ export default function MasterUnitPage() {
                 <button
                   onClick={handleSeed}
                   disabled={isSeeding}
-                  className="inline-flex items-center gap-2 rounded-[7px] border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-[5.6px] border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-60"
                 >
                   {isSeeding ? (
-                    <Loader2 size={14} className="animate-spin" />
+                    <Loader2 size={11.2} className="animate-spin" />
                   ) : (
-                    <GitBranch size={14} />
+                    <GitBranch size={11.2} />
                   )}
                   Generate
                 </button>
@@ -635,9 +635,9 @@ export default function MasterUnitPage() {
                   className="jr-button-secondary min-h-0 px-3 py-2 text-xs disabled:opacity-60"
                 >
                   {isLoading ? (
-                    <Loader2 size={14} className="animate-spin" />
+                    <Loader2 size={11.2} className="animate-spin" />
                   ) : (
-                    <RefreshCcw size={14} />
+                    <RefreshCcw size={11.2} />
                   )}
                   Refresh
                 </button>
@@ -645,9 +645,9 @@ export default function MasterUnitPage() {
             ) : null
           }
         >
-          <div className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-[minmax(360px,1fr)_220px_180px]">
+          <div className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-[minmax(288px,1fr)_176px_144px]">
             <div className="jr-field flex items-center gap-3 px-3 py-0">
-              <Search size={17} className="text-slate-400" />
+              <Search size={13.6} className="text-slate-400" />
               <input
                 value={q}
                 onChange={(event) => setQ(event.target.value)}
@@ -682,17 +682,17 @@ export default function MasterUnitPage() {
           </div>
 
           {isLoading ? (
-            <div className="jr-state p-8 text-center text-sm font-semibold text-slate-500">
+            <div className="jr-state p-6 text-center text-sm font-semibold text-slate-500">
               Memuat Master Unit...
             </div>
           ) : units.length === 0 ? (
-            <div className="jr-state border-dashed p-8 text-center text-sm font-semibold text-slate-500">
+            <div className="jr-state border-dashed p-6 text-center text-sm font-semibold text-slate-500">
               Belum ada data Master Unit.
             </div>
           ) : (
             <div className="jr-table-shell">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[1180px] text-left text-sm">
+                <table className="w-full min-w-[944px] text-left text-sm">
                   <thead className="jr-table-head">
                     <tr>
                       <th className="px-4 py-3">Unit</th>
@@ -726,7 +726,7 @@ export default function MasterUnitPage() {
                         <td className="px-4 py-3 text-slate-600">
                           {unit.parent ? (
                             <span className="inline-flex items-center gap-2 font-semibold">
-                              <GitBranch size={14} className="text-slate-400" />
+                              <GitBranch size={11.2} className="text-slate-400" />
                               {unit.parent.canonical_name}
                             </span>
                           ) : (
@@ -737,7 +737,7 @@ export default function MasterUnitPage() {
                         <td className="px-4 py-3 text-slate-600">
                           {unit.latitude !== null && unit.longitude !== null ? (
                             <span className="inline-flex items-center gap-2 font-semibold">
-                              <MapPin size={14} className="text-slate-400" />
+                              <MapPin size={11.2} className="text-slate-400" />
                               {unit.latitude}, {unit.longitude}
                             </span>
                           ) : (
@@ -745,7 +745,7 @@ export default function MasterUnitPage() {
                           )}
                         </td>
 
-                        <td className="max-w-[320px] px-4 py-3">
+                        <td className="max-w-[256px] px-4 py-3">
                           <div className="flex flex-wrap gap-1.5">
                             {unit.aliases.slice(0, 4).map((alias) => (
                               <span
@@ -771,18 +771,18 @@ export default function MasterUnitPage() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleEdit(unit)}
-                            className="inline-flex items-center gap-1.5 rounded-[7px] border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                            className="inline-flex items-center gap-1.5 rounded-[5.6px] border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
                             >
-                              <Pencil size={13} />
+                              <Pencil size={10.4} />
                               Edit
                             </button>
 
                             <button
                               onClick={() => handleDeactivate(unit)}
                               disabled={!unit.is_active}
-                              className="inline-flex items-center gap-1.5 rounded-[7px] border border-red-100 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                              className="inline-flex items-center gap-1.5 rounded-[5.6px] border border-red-100 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40"
                             >
-                              <Power size={13} />
+                              <Power size={10.4} />
                               Nonaktif
                             </button>
                           </div>

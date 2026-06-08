@@ -31,7 +31,7 @@ export function RevenueCompositionChart({
 
   return (
     <div
-      className={`grid grid-cols-1 gap-4 md:grid-cols-[220px_1fr] ${className}`}
+      className={`grid grid-cols-1 gap-4 md:grid-cols-[176px_1fr] ${className}`}
     >
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
@@ -40,8 +40,8 @@ export function RevenueCompositionChart({
               data={data}
               dataKey="amount"
               nameKey="source_name"
-              innerRadius={58}
-              outerRadius={88}
+              innerRadius={46.4}
+              outerRadius={70.4}
               paddingAngle={3}
             >
               {data.map((entry) => (

@@ -572,7 +572,11 @@ export default function OverviewDashboardPage() {
 
   useEffect(() => {
     if (selectedMapUnitId && !selectedMapUnit) {
-      setSelectedMapUnitId(null);
+      const timeoutId = window.setTimeout(() => {
+        setSelectedMapUnitId(null);
+      }, 0);
+
+      return () => window.clearTimeout(timeoutId);
     }
   }, [selectedMapUnit, selectedMapUnitId]);
 
@@ -656,13 +660,13 @@ export default function OverviewDashboardPage() {
         />
 
         {loading && (
-          <div className="jr-state p-8 text-center text-sm font-semibold text-slate-500">
+          <div className="jr-state p-6 text-center text-sm font-semibold text-slate-500">
             Memuat data dashboard...
           </div>
         )}
 
         {error && (
-          <div className="rounded-[8px] border border-red-200 bg-red-50 p-5 text-sm font-semibold text-red-700">
+          <div className="rounded-[6.4px] border border-red-200 bg-red-50 p-5 text-sm font-semibold text-red-700">
             {error}
           </div>
         )}
@@ -674,7 +678,7 @@ export default function OverviewDashboardPage() {
                 title="Total Pendapatan"
                 value={formatRupiah(kpiMetrics.currentRevenue)}
                 subtitle={kpiScopeSubtitle}
-                icon={<BarChart3 size={22} />}
+                icon={<BarChart3 size={17.6} />}
               />
 
               <KpiCard
@@ -692,7 +696,7 @@ export default function OverviewDashboardPage() {
                     ? `vs ${comparison.label}`
                     : "Perbandingan tahun sebelumnya"
                 }
-                icon={<Percent size={22} />}
+                icon={<Percent size={17.6} />}
                 trend={
                   kpiMetrics.growthPct !== null &&
                   kpiMetrics.growthPct !== undefined
@@ -708,7 +712,7 @@ export default function OverviewDashboardPage() {
                 title="Total Pelayanan"
                 value={formatNumber(kpiMetrics.totalPelayanan)}
                 subtitle={kpiScopeSubtitle}
-                icon={<Users size={22} />}
+                icon={<Users size={17.6} />}
               />
 
               <KpiCard
@@ -719,21 +723,21 @@ export default function OverviewDashboardPage() {
                     : formatPercent(kpiMetrics.slaPelayanan)
                 }
                 subtitle={kpiScopeSubtitle}
-                icon={<ShieldCheck size={22} />}
+                icon={<ShieldCheck size={17.6} />}
               />
 
               <KpiCard
                 title="Total Kecelakaan"
                 value={formatNumber(kpiMetrics.totalKecelakaan)}
                 subtitle={kpiScopeSubtitle}
-                icon={<HeartPulse size={22} />}
+                icon={<HeartPulse size={17.6} />}
               />
 
               <KpiCard
                 title="Total Kegiatan"
                 value={formatNumber(kpiMetrics.totalKegiatan)}
                 subtitle={kpiScopeSubtitle}
-                icon={<CalendarCheck2 size={22} />}
+                icon={<CalendarCheck2 size={17.6} />}
               />
             </section>
 
@@ -753,7 +757,7 @@ export default function OverviewDashboardPage() {
                     key={value}
                     type="button"
                     onClick={() => setActiveTrendFunction(value)}
-                    className={`inline-flex min-h-11 items-center rounded-[8px] border px-4 text-sm font-semibold transition ${
+                    className={`inline-flex min-h-11 items-center rounded-[6.4px] border px-4 text-sm font-semibold transition ${
                       isActive
                         ? "border-[#1f4fea] bg-[#1f4fea] text-white shadow-sm"
                         : "border-[#dce3ed] bg-white text-slate-700 hover:border-[#1f4fea] hover:text-[#1f4fea]"
@@ -776,8 +780,8 @@ export default function OverviewDashboardPage() {
               <SectionCard
                 title={`Analisis Tren ${trendConfig.valueLabel}`}
                 action={
-                  <div className="flex items-center gap-2 rounded-[7px] border border-[#dce3ed] bg-[#f8fafc] px-3 py-1.5">
-                    <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500">
+                  <div className="flex items-center gap-2 rounded-[5.6px] border border-[#dce3ed] bg-[#f8fafc] px-3 py-1.5">
+                    <span className="text-[8.8px] font-bold uppercase tracking-[0.08em] text-slate-500">
                       Total YtD
                     </span>
                     <span className="text-sm font-bold text-slate-950">
@@ -816,7 +820,7 @@ export default function OverviewDashboardPage() {
                 className="flex h-full min-w-0 flex-col"
               >
                 <div
-                  className="grid min-h-[400px] grid-cols-1 gap-4 2xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]"
+                  className="grid min-h-[288px] grid-cols-1 gap-4 lg:min-h-[304px] 2xl:grid-cols-[minmax(0,1.35fr)_minmax(256px,0.65fr)]"
                 >
                   <RevenueMap
                     units={filteredMapUnits}
@@ -859,12 +863,12 @@ export default function OverviewDashboardPage() {
                     >
                       {isSummaryExpanded ? (
                         <>
-                          <ChevronUp size={15} />
+                          <ChevronUp size={12} />
                           Sembunyikan
                         </>
                       ) : (
                         <>
-                          <ChevronDown size={15} />
+                          <ChevronDown size={12} />
                           Selengkapnya
                         </>
                       )}

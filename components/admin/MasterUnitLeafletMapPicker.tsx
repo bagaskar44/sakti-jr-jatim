@@ -116,14 +116,14 @@ export default function MasterUnitLeafletMapPicker({
       L.divIcon({
         className: "master-unit-picker-marker-host",
         html: '<span class="master-unit-picker-marker"></span>',
-        iconAnchor: [14, 30],
-        iconSize: [28, 34],
+        iconAnchor: [11.2, 24],
+        iconSize: [22.4, 27.2],
       }),
     []
   );
 
   return (
-    <div className="relative h-[220px] overflow-hidden rounded-[8px] border border-[#dce3ed] bg-slate-100 shadow-sm">
+    <div className="relative h-[176px] overflow-hidden rounded-[6.4px] border border-[#dce3ed] bg-slate-100 shadow-sm">
       <MapContainer
         center={selectedPosition ?? EAST_JAVA_CENTER}
         className="master-unit-map-picker h-full w-full"
@@ -161,7 +161,7 @@ export default function MasterUnitLeafletMapPicker({
       </MapContainer>
 
       {!selectedPosition && (
-        <div className="pointer-events-none absolute left-3 top-3 z-[500] rounded-[7px] border border-[#dce3ed] bg-white/95 px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm backdrop-blur">
+        <div className="pointer-events-none absolute left-3 top-3 z-[500] rounded-[5.6px] border border-[#dce3ed] bg-white/95 px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm backdrop-blur">
           Belum ada titik koordinat
         </div>
       )}

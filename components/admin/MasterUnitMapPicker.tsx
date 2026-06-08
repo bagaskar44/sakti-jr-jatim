@@ -23,8 +23,8 @@ const LeafletMasterUnitMapPicker = dynamic<MasterUnitMapPickerProps>(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-[220px] items-center justify-center gap-2 rounded-[8px] border border-[#dce3ed] bg-[#f8fafc] text-sm font-semibold text-slate-500">
-        <MapPinned size={18} className="text-blue-700" />
+      <div className="flex h-[176px] items-center justify-center gap-2 rounded-[6.4px] border border-[#dce3ed] bg-[#f8fafc] text-sm font-semibold text-slate-500">
+        <MapPinned size={14.4} className="text-blue-700" />
         Memuat peta...
       </div>
     ),
@@ -107,7 +107,7 @@ export function MasterUnitMapPicker({
             onClick={closePicker}
           />
 
-          <div className="relative z-10 flex max-h-[calc(100vh-32px)] w-full max-w-4xl flex-col overflow-hidden rounded-[8px] border border-[#dce3ed] bg-white shadow-2xl">
+          <div className="relative z-10 flex max-h-[calc(100vh-25.6px)] w-full max-w-4xl flex-col overflow-hidden rounded-[6.4px] border border-[#dce3ed] bg-white shadow-2xl">
             <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#dce3ed] px-4 py-3">
               <div className="min-w-0">
                 <p className="text-sm font-bold text-slate-950">
@@ -122,10 +122,10 @@ export function MasterUnitMapPicker({
               <button
                 type="button"
                 onClick={closePicker}
-                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-[#dce3ed] bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[5.6px] border border-[#dce3ed] bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                 title="Tutup"
               >
-                <X size={16} />
+                <X size={12.8} />
               </button>
             </div>
 
@@ -155,7 +155,7 @@ export function MasterUnitMapPicker({
                       }
                       className="jr-button-secondary min-h-0 px-3 py-2 text-xs"
                     >
-                      <X size={14} />
+                      <X size={11.2} />
                       Reset
                     </button>
                   )}
@@ -165,7 +165,7 @@ export function MasterUnitMapPicker({
                     onClick={commitPicker}
                     className="jr-button-primary min-h-0 px-3 py-2 text-xs"
                   >
-                    <Check size={14} />
+                    <Check size={11.2} />
                     Selesai
                   </button>
                 </div>
@@ -183,7 +183,7 @@ export function MasterUnitMapPicker({
               className="inline-flex items-center gap-1.5 rounded-full border border-[#dce3ed] bg-white px-2.5 py-1 text-xs font-semibold text-slate-500 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
               title="Hapus koordinat"
             >
-              <X size={13} />
+              <X size={10.4} />
               Hapus koordinat
             </button>
         </div>

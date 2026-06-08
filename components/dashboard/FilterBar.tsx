@@ -179,7 +179,7 @@ export function FilterBar({
               onClick={onReset}
               className="jr-button-secondary h-10 min-h-10 flex-1 px-3"
             >
-              <RotateCcw size={16} />
+              <RotateCcw size={12.8} />
               Reset
             </button>
 
@@ -187,7 +187,7 @@ export function FilterBar({
               onClick={onApply}
               className="jr-button-primary h-10 min-h-10 flex-1 px-3"
             >
-              <Check size={16} />
+              <Check size={12.8} />
               Terapkan
             </button>
           </div>

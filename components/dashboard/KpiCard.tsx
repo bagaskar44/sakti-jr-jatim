@@ -17,9 +17,9 @@ export function KpiCard({ title, value, subtitle, icon, trend }: KpiCardProps) {
   const isUp = trend?.direction === "up";
 
   return (
-    <div className="jr-card p-3 transition hover:shadow-[0_6px_16px_rgba(15,23,42,0.12)]">
+    <div className="jr-card p-3 transition hover:shadow-[0_4.8px_12.8px_rgba(15,23,42,0.12)]">
       <div className="mb-2 flex items-start justify-between gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-[7px] bg-blue-50 text-blue-700">
+        <div className="flex h-9 w-9 items-center justify-center rounded-[5.6px] bg-blue-50 text-blue-700">
           {icon}
         </div>
 
@@ -33,14 +33,14 @@ export function KpiCard({ title, value, subtitle, icon, trend }: KpiCardProps) {
                 : "bg-slate-100 text-slate-500"
             }`}
           >
-            {isDown ? <ArrowDownRight size={14} /> : <ArrowUpRight size={14} />}
+            {isDown ? <ArrowDownRight size={11.2} /> : <ArrowUpRight size={11.2} />}
             {trend.value}
           </div>
         )}
       </div>
 
       <p className="jr-label">{title}</p>
-      <p className="mt-1 text-[22px] font-semibold leading-tight tracking-tight text-slate-950">
+      <p className="mt-1 text-[17.6px] font-semibold leading-tight tracking-tight text-slate-950">
         {value}
       </p>
       {subtitle && (

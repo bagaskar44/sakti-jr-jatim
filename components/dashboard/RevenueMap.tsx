@@ -35,7 +35,7 @@ const LeafletRevenueMap = dynamic<RevenueMapProps>(
   {
     ssr: false,
     loading: () => (
-      <div className="jr-state flex h-full min-h-[400px] w-full flex-1 items-center justify-center text-sm font-semibold text-slate-500">
+      <div className="jr-state flex h-full min-h-[288px] w-full flex-1 items-center justify-center text-sm font-semibold text-slate-500 lg:min-h-[304px]">
         Memuat peta OpenStreetMap...
       </div>
     ),
@@ -45,9 +45,9 @@ const LeafletRevenueMap = dynamic<RevenueMapProps>(
 export function RevenueMap(props: RevenueMapProps) {
   if (props.units.length === 0) {
     return (
-      <div className="jr-state flex h-full min-h-[400px] w-full flex-1 flex-col items-center justify-center border-dashed p-8 text-center">
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[7px] bg-blue-50 text-blue-700">
-          <MapPinned size={28} />
+      <div className="jr-state flex h-full min-h-[288px] w-full flex-1 flex-col items-center justify-center border-dashed p-6 text-center lg:min-h-[304px]">
+        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-[5.6px] bg-blue-50 text-blue-700">
+          <MapPinned size={19.2} />
         </div>
         <h3 className="text-base font-bold text-slate-900">
           Belum ada koordinat unit aktif

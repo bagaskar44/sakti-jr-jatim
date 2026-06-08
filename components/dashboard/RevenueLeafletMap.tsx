@@ -58,10 +58,10 @@ function getMarkerSize(
   source: string,
   maxAmount: number
 ) {
-  if (unit.unit_type === "KANWIL") return 42;
+  if (unit.unit_type === "KANWIL") return 33.6;
 
   const amount = getAmountBySource(unit, source);
-  return 28 + Math.round((amount / maxAmount) * 14);
+  return 22.4 + Math.round((amount / maxAmount) * 11.2);
 }
 
 function createMarkerIcon(
@@ -214,7 +214,7 @@ function FitBounds({ bounds }: { bounds: LatLngBoundsExpression | null }) {
 
     map.fitBounds(bounds, {
       maxZoom: 10,
-      padding: [34, 34],
+      padding: [27.2, 27.2],
     });
   }, [bounds, map]);
 
@@ -314,7 +314,7 @@ export default function RevenueLeafletMap({
 
   return (
     <div
-      className={`relative h-full min-h-[400px] w-full flex-1 overflow-hidden rounded-[8px] border border-[#dce3ed] bg-slate-100 shadow-[0_2px_8px_rgba(15,23,42,0.1)] ${className}`}
+      className={`relative h-full min-h-[288px] w-full flex-1 overflow-hidden rounded-[6.4px] border border-[#dce3ed] bg-slate-100 shadow-[0_1.6px_6.4px_rgba(15,23,42,0.1)] lg:min-h-[304px] ${className}`}
     >
       <MapContainer
         center={initialCenter}
@@ -360,13 +360,13 @@ export default function RevenueLeafletMap({
               <Popup
                 className="revenue-unit-popup"
                 closeButton={false}
-                maxWidth={310}
-                minWidth={300}
+                maxWidth={248}
+                minWidth={240}
                 offset={[0, -size / 2]}
               >
                 <div className="w-full text-[#07113b]">
                   <div className="border-b border-[#cfe0ff] pb-2">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#1f4fea]">
+                    <p className="text-[7.2px] font-bold uppercase tracking-[0.16em] text-[#1f4fea]">
                       Detail {getDetailFunctionLabel(detailFunction)}
                     </p>
                     <h3 className="mt-1 break-words text-base font-bold leading-tight text-[#07113b]">
@@ -375,8 +375,8 @@ export default function RevenueLeafletMap({
                   </div>
 
                   {primaryMetric && (
-                    <div className="mt-2 rounded-[7px] bg-[#eef5ff] px-2.5 py-1.5">
-                      <p className="text-[9px] font-bold uppercase tracking-[0.08em] text-[#1f4fea]">
+                    <div className="mt-2 rounded-[5.6px] bg-[#eef5ff] px-2.5 py-1.5">
+                      <p className="text-[7.2px] font-bold uppercase tracking-[0.08em] text-[#1f4fea]">
                         {primaryMetric.label}
                       </p>
                       <p className="mt-1 break-words text-lg font-bold leading-none text-[#1f4fea]">
@@ -391,7 +391,7 @@ export default function RevenueLeafletMap({
                         className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 py-1.5"
                         key={metric.label}
                       >
-                        <p className="min-w-0 break-words text-[11px] font-bold uppercase tracking-[0.04em] text-[#1f4fea]">
+                        <p className="min-w-0 break-words text-[8.8px] font-bold uppercase tracking-[0.04em] text-[#1f4fea]">
                           {metric.label}
                         </p>
                         <p className="text-right text-xs font-bold text-[#07113b]">
@@ -410,10 +410,10 @@ export default function RevenueLeafletMap({
                       detailFunction,
                     })}
                     prefetch={false}
-                    className="mt-2 inline-flex min-h-7 w-full items-center justify-center gap-1 rounded-[7px] bg-[#1f4fea] px-2.5 text-[12px] font-bold !text-white shadow-sm hover:bg-blue-700"
+                    className="mt-2 inline-flex min-h-7 w-full items-center justify-center gap-1 rounded-[5.6px] bg-[#1f4fea] px-2.5 text-[9.6px] font-bold !text-white shadow-sm hover:bg-blue-700"
                   >
                     Lihat Detail {getDetailFunctionLabel(detailFunction)}
-                    <ExternalLink size={10} />
+                    <ExternalLink size={8} />
                   </Link>
                 </div>
               </Popup>
@@ -422,9 +422,9 @@ export default function RevenueLeafletMap({
         })}
       </MapContainer>
 
-      <div className="pointer-events-none absolute left-3 top-3 z-[500] rounded-[7px] border border-[#dce3ed] bg-white/95 px-3 py-2 shadow-sm backdrop-blur">
+      <div className="pointer-events-none absolute left-3 top-3 z-[500] rounded-[5.6px] border border-[#dce3ed] bg-white/95 px-3 py-2 shadow-sm backdrop-blur">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-600">
-          <MapPin size={14} className="text-blue-700" />
+          <MapPin size={11.2} className="text-blue-700" />
           OpenStreetMap
         </div>
       </div>

@@ -20,7 +20,7 @@ function getSummaryColumnLabels(functionName: DashboardFunctionMetric) {
     return {
       primary: "Total Pelayanan",
       details: ["SLA", "Layanan Selesai"],
-      minWidthClass: "min-w-[760px]",
+      minWidthClass: "min-w-[608px]",
     };
   }
 
@@ -28,14 +28,14 @@ function getSummaryColumnLabels(functionName: DashboardFunctionMetric) {
     return {
       primary: "Total Kecelakaan",
       details: ["Santunan Proses", "SLA"],
-      minWidthClass: "min-w-[760px]",
+      minWidthClass: "min-w-[608px]",
     };
   }
 
   return {
     primary: "Total",
     details: ["SWDKLLJ", "IWKBU", "IWKL"],
-    minWidthClass: "min-w-[900px]",
+    minWidthClass: "min-w-[720px]",
   };
 }
 
@@ -125,10 +125,10 @@ export function RevenueSummaryTable({
                         source,
                         functionName,
                       })}
-                      className="inline-flex items-center gap-1 rounded-[7px] border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                      className="inline-flex items-center gap-1 rounded-[5.6px] border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
                     >
                       Lihat Detail
-                      <ExternalLink size={13} />
+                      <ExternalLink size={10.4} />
                     </a>
                   </td>
                 </tr>
@@ -138,7 +138,7 @@ export function RevenueSummaryTable({
         </table>
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-[#dce3ed] bg-[#f8fafc] px-4 py-3 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2.5 border-t border-[#dce3ed] bg-[#f8fafc] px-3 py-2.5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
         <span>
           Menampilkan {displayedUnits.length} dari {sortedUnits.length} unit.
         </span>

@@ -141,7 +141,7 @@ export function LatestActivitiesOverviewSection({
           className="absolute left-0 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-[#dce3ed] bg-white text-slate-500 shadow-sm transition hover:border-blue-200 hover:text-[#1f4fea]"
           aria-label="Geser kegiatan ke kiri"
         >
-          <ChevronLeft size={19} />
+          <ChevronLeft size={15.2} />
         </button>
 
         <div
@@ -151,9 +151,9 @@ export function LatestActivitiesOverviewSection({
           {activities.map((activity) => (
             <article
               key={`${activity.unit}-${activity.title}`}
-              className="grid min-h-[150px] w-[300px] shrink-0 snap-start grid-cols-[84px_minmax(0,1fr)] gap-3 rounded-[8px] border border-[#dce3ed] bg-white p-3 shadow-sm xl:w-[calc((100%_-_36px)/4)]"
+              className="grid min-h-[120px] w-[240px] shrink-0 snap-start grid-cols-[67.2px_minmax(0,1fr)] gap-3 rounded-[6.4px] border border-[#dce3ed] bg-white p-3 shadow-sm xl:w-[calc((100%_-_28.8px)/4)]"
             >
-              <div className="flex h-[86px] items-center justify-center rounded-[7px] border border-[#dce3ed] bg-[#f8fafc] text-center text-[11px] font-bold text-slate-400">
+              <div className="flex h-[68.8px] items-center justify-center rounded-[5.6px] border border-[#dce3ed] bg-[#f8fafc] text-center text-[8.8px] font-bold text-slate-400">
                 In Update...
               </div>
 
@@ -162,19 +162,19 @@ export function LatestActivitiesOverviewSection({
                   {activity.title}
                 </h3>
                 <span
-                  className={`mt-2 w-fit rounded-[7px] border px-2 py-1 text-[10px] font-bold ${getActivityFunctionBadgeClass(activity.category)}`}
+                  className={`mt-2 w-fit rounded-[5.6px] border px-2 py-1 text-[8px] font-bold ${getActivityFunctionBadgeClass(activity.category)}`}
                 >
                   {activity.category}
                 </span>
 
-                <div className="mt-2 space-y-1 text-[11px] font-semibold text-slate-600">
+                <div className="mt-2 space-y-1 text-[8.8px] font-semibold text-slate-600">
                   <p className="flex min-w-0 items-center gap-1.5">
-                    <MapPin size={12} className="shrink-0 text-[#1f4fea]" />
+                    <MapPin size={9.6} className="shrink-0 text-[#1f4fea]" />
                     <span className="truncate">{activity.unit}</span>
                   </p>
                   <p className="flex items-center gap-1.5">
                     <CalendarDays
-                      size={12}
+                      size={9.6}
                       className="shrink-0 text-[#1f4fea]"
                     />
                     {activity.date}
@@ -185,10 +185,10 @@ export function LatestActivitiesOverviewSection({
               <Link
                 href={getActivityHref(activity, year)}
                 prefetch={false}
-                className="col-span-2 mt-1 inline-flex h-9 items-center justify-center gap-1 rounded-[7px] bg-[#1f4fea] px-3 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1f4fea]"
+                className="col-span-2 mt-1 inline-flex h-9 items-center justify-center gap-1 rounded-[5.6px] bg-[#1f4fea] px-3 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1f4fea]"
               >
                 Lihat Detail
-                <ExternalLink size={13} />
+                <ExternalLink size={10.4} />
               </Link>
             </article>
           ))}
@@ -200,7 +200,7 @@ export function LatestActivitiesOverviewSection({
           className="absolute right-0 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-[#dce3ed] bg-white text-slate-500 shadow-sm transition hover:border-blue-200 hover:text-[#1f4fea]"
           aria-label="Geser kegiatan ke kanan"
         >
-          <ChevronRight size={19} />
+          <ChevronRight size={15.2} />
         </button>
       </div>
     </SectionCard>

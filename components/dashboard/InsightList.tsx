@@ -41,7 +41,7 @@ export function InsightList({
 
   const items = [
     {
-      icon: <BarChart3 size={18} />,
+      icon: <BarChart3 size={14.4} />,
       title: `${dominant.name} menjadi kontributor terbesar`,
       description: `${dominant.name} menyumbang ${formatRupiah(
         dominant.amount
@@ -51,9 +51,9 @@ export function InsightList({
     {
       icon:
         growth !== null && growth < 0 ? (
-          <TrendingDown size={18} />
+          <TrendingDown size={14.4} />
         ) : (
-          <TrendingUp size={18} />
+          <TrendingUp size={14.4} />
         ),
       title:
         growth !== null && growth < 0
@@ -66,7 +66,7 @@ export function InsightList({
       tone: growth !== null && growth < 0 ? "orange" : "green",
     },
     {
-      icon: <AlertTriangle size={18} />,
+      icon: <AlertTriangle size={14.4} />,
       title: "Validasi data memiliki beberapa warning",
       description:
         warnings.length > 0
@@ -75,7 +75,7 @@ export function InsightList({
       tone: warnings.length > 0 ? "orange" : "green",
     },
     {
-      icon: <Info size={18} />,
+      icon: <Info size={14.4} />,
       title: "Data berasal dari hasil sinkronisasi spreadsheet",
       description:
         "Dashboard membaca data bersih dari Supabase, bukan langsung dari Google Sheets.",
@@ -91,7 +91,7 @@ export function InsightList({
           className="jr-card flex gap-3 p-3"
         >
           <div
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[7px] ${
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[5.6px] ${
               item.tone === "orange"
                 ? "bg-orange-50 text-orange-600"
                 : item.tone === "green"

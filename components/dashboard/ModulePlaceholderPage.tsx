@@ -28,9 +28,9 @@ export function ModulePlaceholderPage({
 
       <div className="flex min-h-0 flex-1 px-5 pb-5 pt-2">
         <section className="jr-card flex min-h-0 w-full flex-1 flex-col p-4">
-          <div className="flex min-h-[420px] flex-1 flex-col items-center justify-center p-8 text-center">
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[8px] bg-blue-50 text-[#1f4fea]">
-              <Icon size={28} />
+          <div className="flex min-h-[272px] flex-1 flex-col items-center justify-center p-6 text-center lg:min-h-[288px]">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-[6.4px] bg-blue-50 text-[#1f4fea]">
+              <Icon size={19.2} />
             </div>
             <h2 className="text-base font-bold text-slate-950">
               {statusTitle ?? `Modul ${title} In Update...`}

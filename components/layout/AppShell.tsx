@@ -88,16 +88,17 @@ function BrandLockup() {
           src="/images/logo-jasa-raharja.png"
           alt="Logo Jasa Raharja"
           fill
+          sizes="35.2px"
           className="object-contain"
           priority
         />
       </div>
 
       <div className="min-w-0">
-        <p className="whitespace-nowrap text-[18px] font-extrabold leading-none text-white">
+        <p className="whitespace-nowrap text-[14.4px] font-extrabold leading-none text-white">
           SAKTI JR Jatim
         </p>
-        <p className="mt-1.5 whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.04em] text-white/80">
+        <p className="mt-1.5 whitespace-nowrap text-[7.2px] font-semibold uppercase tracking-[0.04em] text-white/80">
           Jasa Raharja Jawa Timur
         </p>
       </div>
@@ -130,7 +131,7 @@ function SidebarContent({
 
       <div className="flex-1 overflow-y-auto px-3 pb-5">
         <div className="mb-6">
-          <p className="mb-2 px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+          <p className="mb-2 px-3 text-[8.8px] font-bold uppercase tracking-[0.18em] text-slate-500">
             Dashboard
           </p>
 
@@ -144,18 +145,18 @@ function SidebarContent({
                   key={item.href}
                   href={item.href}
                   onClick={onNavigate}
-                  className={`group flex items-center justify-between rounded-[8px] px-3 py-3 text-sm font-semibold transition ${
+                  className={`group flex items-center justify-between rounded-[6.4px] px-3 py-3 text-sm font-semibold transition ${
                     active
-                      ? "bg-[#1f4fea] text-white shadow-[0_10px_18px_rgba(30,64,175,0.22)]"
+                      ? "bg-[#1f4fea] text-white shadow-[0_8px_14.4px_rgba(30,64,175,0.22)]"
                       : "text-slate-300 hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   <span className="flex items-center gap-3">
-                    <Icon size={18} />
+                    <Icon size={14.4} />
                     {item.label}
                   </span>
 
-                  {active && <ChevronRight size={16} />}
+                  {active && <ChevronRight size={12.8} />}
                 </Link>
               );
             })}
@@ -164,7 +165,7 @@ function SidebarContent({
 
         {canAccessAdmin && (
           <div>
-            <p className="mb-2 px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+            <p className="mb-2 px-3 text-[8.8px] font-bold uppercase tracking-[0.18em] text-slate-500">
               Admin
             </p>
 
@@ -178,18 +179,18 @@ function SidebarContent({
                     key={item.href}
                     href={item.href}
                     onClick={onNavigate}
-                    className={`group flex items-center justify-between rounded-[8px] px-3 py-3 text-sm font-semibold transition ${
+                    className={`group flex items-center justify-between rounded-[6.4px] px-3 py-3 text-sm font-semibold transition ${
                       active
-                        ? "bg-[#1f4fea] text-white shadow-[0_10px_18px_rgba(30,64,175,0.22)]"
+                        ? "bg-[#1f4fea] text-white shadow-[0_8px_14.4px_rgba(30,64,175,0.22)]"
                         : "text-slate-300 hover:bg-white/10 hover:text-white"
                     }`}
                   >
                     <span className="flex items-center gap-3">
-                      <Icon size={18} />
+                      <Icon size={14.4} />
                       {item.label}
                     </span>
 
-                    {active && <ChevronRight size={16} />}
+                    {active && <ChevronRight size={12.8} />}
                   </Link>
                 );
               })}
@@ -243,9 +244,9 @@ export function AppShell({ children }: AppShellProps) {
   }
 
   return (
-    <div className="jr-page lg:grid lg:grid-cols-[280px_1fr]">
+    <div className="jr-page lg:grid lg:grid-cols-[224px_1fr]">
       <aside className="hidden min-h-screen lg:block">
-        <div className="fixed inset-y-0 left-0 w-[280px]">
+        <div className="fixed inset-y-0 left-0 w-[224px]">
           <SidebarContent pathname={pathname} role={role} />
         </div>
       </aside>
@@ -255,9 +256,9 @@ export function AppShell({ children }: AppShellProps) {
           <BrandLockup />
           <button
             onClick={() => setMobileOpen(true)}
-            className="rounded-[8px] border border-white/20 bg-white/10 p-2 text-white shadow-sm"
+            className="rounded-[6.4px] border border-white/20 bg-white/10 p-2 text-white shadow-sm"
           >
-            <Menu size={22} />
+            <Menu size={17.6} />
           </button>
         </div>
 
@@ -268,12 +269,12 @@ export function AppShell({ children }: AppShellProps) {
               onClick={() => setMobileOpen(false)}
             />
 
-            <div className="absolute inset-y-0 left-0 w-[290px] shadow-2xl">
+            <div className="absolute inset-y-0 left-0 w-[232px] shadow-2xl">
               <button
                 onClick={() => setMobileOpen(false)}
-                className="absolute right-3 top-3 z-10 rounded-[8px] bg-white/10 p-2 text-white"
+                className="absolute right-3 top-3 z-10 rounded-[6.4px] bg-white/10 p-2 text-white"
               >
-                <X size={20} />
+                <X size={16} />
               </button>
 
               <SidebarContent

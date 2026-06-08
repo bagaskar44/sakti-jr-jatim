@@ -78,22 +78,22 @@ export function DashboardHeader({
   return (
     <header className="w-full px-5 pb-2 pt-9 lg:flex lg:items-start lg:justify-between lg:gap-5">
       <div className="min-w-0">
-        <h1 className="text-[28px] font-extrabold leading-tight tracking-tight text-[#0b1020] lg:text-[34px]">
+        <h1 className="text-[22.4px] font-extrabold leading-tight tracking-tight text-[#0b1020] lg:text-[27.2px]">
           {title}
         </h1>
-        <p className="mt-1.5 text-[15px] leading-6 text-[#5b6b85] lg:text-base">
+        <p className="mt-1.5 text-[12px] leading-6 text-[#5b6b85] lg:text-base">
           {subtitle}
         </p>
       </div>
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center lg:mt-0">
-        <div className="flex min-h-[46px] items-center gap-3 rounded-[8px] border border-[#dce3ed] bg-white px-3 py-1.5 shadow-sm">
-          <div className="flex h-8 w-8 items-center justify-center rounded-[7px] bg-blue-50 text-blue-700">
-            <UserCircle2 size={18} />
+        <div className="flex min-h-[36.8px] items-center gap-3 rounded-[6.4px] border border-[#dce3ed] bg-white px-3 py-1.5 shadow-sm">
+          <div className="flex h-8 w-8 items-center justify-center rounded-[5.6px] bg-blue-50 text-blue-700">
+            <UserCircle2 size={14.4} />
           </div>
 
           <div className="min-w-0">
-            <p className="max-w-[150px] truncate text-sm font-semibold text-slate-950">
+            <p className="max-w-[120px] truncate text-sm font-semibold text-slate-950">
               {fullName ?? userEmail ?? "User"}
             </p>
             <p className="text-xs font-medium text-slate-500">
@@ -103,15 +103,15 @@ export function DashboardHeader({
 
           <button
             onClick={handleLogout}
-            className="ml-1 rounded-[7px] p-1.5 text-slate-400 hover:bg-slate-100 hover:text-red-600"
+            className="ml-1 rounded-[5.6px] p-1.5 text-slate-400 hover:bg-slate-100 hover:text-red-600"
             title="Logout"
           >
-            <LogOut size={16} />
+            <LogOut size={12.8} />
           </button>
         </div>
 
-        <button className="jr-button-primary min-h-[46px] px-4 py-2 shadow-none">
-          <Download size={17} />
+        <button className="jr-button-primary min-h-[36.8px] px-4 py-2 shadow-none">
+          <Download size={13.6} />
           Export Report
         </button>
       </div>

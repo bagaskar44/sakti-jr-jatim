@@ -48,7 +48,7 @@ export function TopUnitsCard({
   if (sortedUnits.length === 0) {
     return (
       <div
-        className={`flex h-[370px] items-center justify-center rounded-[8px] border border-dashed border-[#dce3ed] bg-[#f8fafc] text-sm font-semibold text-slate-500 ${className}`}
+        className={`flex h-[296px] items-center justify-center rounded-[6.4px] border border-dashed border-[#dce3ed] bg-[#f8fafc] text-sm font-semibold text-slate-500 ${className}`}
       >
         Tidak ada data unit.
       </div>
@@ -57,7 +57,7 @@ export function TopUnitsCard({
 
   return (
     <div
-      className={`grid h-[370px] grid-rows-5 gap-4 px-1 py-5 ${className}`}
+      className={`grid h-[296px] grid-rows-5 gap-4 px-1 py-5 ${className}`}
     >
       {sortedUnits.map((unit) => {
         const metric = getUnitFunctionMetric({ unit, source, functionName });
@@ -66,10 +66,10 @@ export function TopUnitsCard({
         return (
           <div
             key={unit.unit_name}
-            className="grid min-h-0 grid-cols-[minmax(116px,0.55fr)_minmax(180px,1.48fr)_minmax(68px,auto)] items-center gap-3"
+            className="grid min-h-0 grid-cols-[minmax(92.8px,0.55fr)_minmax(144px,1.48fr)_minmax(54.4px,auto)] items-center gap-3"
           >
             <Link
-              className="block min-w-0 whitespace-normal break-words border-r border-[#dce3ed] pr-3 text-right text-[12px] font-semibold leading-4 text-slate-700 hover:text-[#1f4fea]"
+              className="block min-w-0 whitespace-normal break-words border-r border-[#dce3ed] pr-3 text-right text-[9.6px] font-semibold leading-4 text-slate-700 hover:text-[#1f4fea]"
               href={getFunctionDetailHref({
                 unitName: unit.unit_name,
                 year,
@@ -81,14 +81,14 @@ export function TopUnitsCard({
               {unit.unit_name}
             </Link>
 
-            <div className="h-8 overflow-hidden rounded-[4px] bg-[#edf3ff]">
+            <div className="h-8 overflow-hidden rounded-[3.2px] bg-[#edf3ff]">
               <div
-                className="h-full rounded-[4px]"
+                className="h-full rounded-[3.2px]"
                 style={{ backgroundColor: barColor, width }}
               />
             </div>
 
-            <span className="whitespace-nowrap text-right text-[13px] font-bold tabular-nums text-slate-900">
+            <span className="whitespace-nowrap text-right text-[10.4px] font-bold tabular-nums text-slate-900">
               {metric.formattedPrimaryValue}
             </span>
           </div>

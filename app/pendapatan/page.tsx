@@ -899,7 +899,7 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex min-h-11 items-center rounded-[8px] border px-4 text-sm font-semibold transition ${
+      className={`inline-flex min-h-11 items-center rounded-[6.4px] border px-4 text-sm font-semibold transition ${
         active
           ? "border-[#1f4fea] bg-[#1f4fea] text-white shadow-sm"
           : "border-[#dce3ed] bg-white text-slate-700 hover:border-[#1f4fea] hover:text-[#1f4fea]"
@@ -912,7 +912,7 @@ function TabButton({
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="jr-state border-dashed p-8 text-center text-sm font-semibold text-slate-500">
+    <div className="jr-state border-dashed p-6 text-center text-sm font-semibold text-slate-500">
       {message}
     </div>
   );
@@ -920,7 +920,7 @@ function EmptyState({ message }: { message: string }) {
 
 function PanelBadge({ children }: { children: string }) {
   return (
-    <span className="inline-flex min-h-8 items-center rounded-[7px] border border-blue-100 bg-blue-50 px-3 text-xs font-bold text-blue-700">
+    <span className="inline-flex min-h-8 items-center rounded-[5.6px] border border-blue-100 bg-blue-50 px-3 text-xs font-bold text-blue-700">
       {children}
     </span>
   );
@@ -966,7 +966,7 @@ function GrowthBadge({ value }: { value: number | string | null | undefined }) {
         isDown ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"
       }`}
     >
-      {isDown ? <ArrowDownRight size={13} /> : <ArrowUpRight size={13} />}
+      {isDown ? <ArrowDownRight size={10.4} /> : <ArrowUpRight size={10.4} />}
       {formatPercent(numberValue)}
     </span>
   );
@@ -1000,21 +1000,21 @@ function GeneralKpiGrid({ metrics }: { metrics: DashboardMetrics }) {
         title="Total Pendapatan"
         value={formatRupiah(metrics.total_revenue)}
         subtitle="Total seluruh sumber pendapatan"
-        icon={<BarChart3 size={22} />}
+        icon={<BarChart3 size={17.6} />}
       />
 
       <KpiCard
         title="SWDKLLJ"
         value={formatRupiah(metrics.swdkllj_total)}
         subtitle="Pendapatan SWDKLLJ"
-        icon={<ReceiptText size={22} />}
+        icon={<ReceiptText size={17.6} />}
       />
 
       <KpiCard
         title="IWKBU"
         value={formatRupiah(metrics.iwkbu_total)}
         subtitle="Pendapatan tahun berjalan"
-        icon={<Bus size={22} />}
+        icon={<Bus size={17.6} />}
         trend={
           metrics.iwkbu_growth_pct !== null
             ? {
@@ -1032,7 +1032,7 @@ function GeneralKpiGrid({ metrics }: { metrics: DashboardMetrics }) {
         title="IWKL"
         value={formatRupiah(metrics.iwkl_total)}
         subtitle="Total nominal IWKL"
-        icon={<Ship size={22} />}
+        icon={<Ship size={17.6} />}
       />
 
     </section>
@@ -1046,37 +1046,37 @@ function SwdklljKpiGrid({ metrics }: { metrics: SwdklljMetrics }) {
         title="Total SWDKLLJ"
         value={formatRupiah(metrics.total)}
         subtitle="Total seluruh SWDKLLJ"
-        icon={<BarChart3 size={22} />}
+        icon={<BarChart3 size={17.6} />}
       />
       <KpiCard
         title="KD"
         value={formatRupiah(metrics.kd)}
         subtitle="Komponen KD"
-        icon={<ReceiptText size={22} />}
+        icon={<ReceiptText size={17.6} />}
       />
       <KpiCard
         title="SW"
         value={formatRupiah(metrics.sw)}
         subtitle="Komponen SW"
-        icon={<Bus size={22} />}
+        icon={<Bus size={17.6} />}
       />
       <KpiCard
         title="Denda"
         value={formatRupiah(metrics.denda)}
         subtitle="Komponen denda"
-        icon={<Ship size={22} />}
+        icon={<Ship size={17.6} />}
       />
       <KpiCard
         title="Setor Adjustment"
         value={formatRupiah(metrics.setor_adjustment)}
         subtitle="Komponen setor adjustment"
-        icon={<CreditCard size={22} />}
+        icon={<CreditCard size={17.6} />}
       />
       <KpiCard
         title="Transaksi"
         value={formatNumber(metrics.transaction_count)}
         subtitle="Jumlah transaksi"
-        icon={<Users size={22} />}
+        icon={<Users size={17.6} />}
       />
     </section>
   );
@@ -1095,19 +1095,19 @@ function IwkbuKpiGrid({
         title="Total IWKBU"
         value={formatRupiah(metrics.current_total)}
         subtitle="Total pendapatan IWKBU"
-        icon={<BarChart3 size={22} />}
+        icon={<BarChart3 size={17.6} />}
       />
       <KpiCard
         title="Periode Sebelumnya"
         value={formatRupiah(metrics.previous_total)}
         subtitle="Nominal periode sebelumnya"
-        icon={<ReceiptText size={22} />}
+        icon={<ReceiptText size={17.6} />}
       />
       <KpiCard
         title="Pertumbuhan"
         value={metrics.growth_pct === null ? "Baru aktif" : formatPercent(metrics.growth_pct)}
         subtitle="Dibanding periode sebelumnya"
-        icon={<ArrowUpRight size={22} />}
+        icon={<ArrowUpRight size={17.6} />}
         trend={
           metrics.growth_pct !== null
             ? {
@@ -1126,7 +1126,7 @@ function IwkbuKpiGrid({
         subtitle={
           scope === "all" ? "Unit berkontribusi" : "Titik detail berkontribusi"
         }
-        icon={<Users size={22} />}
+        icon={<Users size={17.6} />}
       />
     </section>
   );
@@ -1144,25 +1144,25 @@ function IwklKpiGrid({
         title="Total IWKL"
         value={formatRupiah(metrics.total)}
         subtitle="Total nominal IWKL"
-        icon={<BarChart3 size={22} />}
+        icon={<BarChart3 size={17.6} />}
       />
       <KpiCard
         title="Penumpang"
         value={formatNumber(metrics.passenger_count)}
         subtitle="Total penumpang"
-        icon={<Users size={22} />}
+        icon={<Users size={17.6} />}
       />
       <KpiCard
         title="Operator Utama"
         value={metrics.top_operator_name}
         subtitle="Operator utama"
-        icon={<Ship size={22} />}
+        icon={<Ship size={17.6} />}
       />
       <KpiCard
         title="Jenis Aktif"
         value={formatNumber(metrics.active_types)}
         subtitle="Jenis berkontribusi"
-        icon={<ReceiptText size={22} />}
+        icon={<ReceiptText size={17.6} />}
       />
     </section>
   );
@@ -1179,7 +1179,7 @@ function DetailLinkButton({
 }) {
   if (disabled) {
     return (
-      <span className="inline-flex rounded-[7px] bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-400">
+      <span className="inline-flex rounded-[5.6px] bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-400">
         Tidak ada detail
       </span>
     );
@@ -1189,10 +1189,10 @@ function DetailLinkButton({
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1 rounded-[7px] border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+      className="inline-flex items-center gap-1 rounded-[5.6px] border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
     >
       {label}
-      <ExternalLink size={13} />
+      <ExternalLink size={10.4} />
     </button>
   );
 }
@@ -1247,28 +1247,28 @@ function UnitFocusCard({
               Unit Terpilih
             </span>
           </div>
-          <h2 className="mt-3 text-xl font-semibold leading-tight text-slate-950">
+          <h2 className="mt-2.5 text-lg font-semibold leading-tight text-slate-950">
             {unit.unit_name}
           </h2>
 
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {unitSummaryItems.map((item) => {
               const Icon = item.icon;
 
               return (
                 <div
                   key={item.label}
-                  className="min-h-[104px] min-w-0 rounded-[8px] border border-[#dce3ed] bg-white p-3 shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition hover:shadow-[0_6px_16px_rgba(15,23,42,0.12)]"
+                  className="min-h-[76.8px] min-w-0 rounded-[6.4px] border border-[#dce3ed] bg-white p-3 shadow-[0_1.6px_6.4px_rgba(15,23,42,0.08)] transition hover:shadow-[0_4.8px_12.8px_rgba(15,23,42,0.12)]"
                 >
                   <span
-                    className={`mb-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-[7px] ${item.iconClassName}`}
+                    className={`mb-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-[5.6px] ${item.iconClassName}`}
                   >
-                    <Icon size={18} />
+                    <Icon size={14.4} />
                   </span>
 
-                  <p className="jr-label text-[11px]">{item.label}</p>
+                  <p className="jr-label text-[8.8px]">{item.label}</p>
                   <p
-                    className={`mt-1 text-[18px] font-semibold leading-tight tracking-tight ${item.valueClassName}`}
+                    className={`mt-1 text-[14.4px] font-semibold leading-tight tracking-tight ${item.valueClassName}`}
                   >
                     {item.value}
                   </p>
@@ -1299,16 +1299,16 @@ function SourceCompositionPanel({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[240px_1fr]">
-      <div className="h-56">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[176px_1fr]">
+      <div className="h-52">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={items}
               dataKey="amount"
               nameKey="label"
-              innerRadius={62}
-              outerRadius={92}
+              innerRadius={44.8}
+              outerRadius={67.2}
               paddingAngle={2}
             >
               {items.map((item) => (
@@ -1321,7 +1321,7 @@ function SourceCompositionPanel({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[680px] text-left text-sm">
+        <table className="w-full min-w-[544px] text-left text-sm">
           <thead className="jr-table-head">
             <tr>
               <th className="px-4 py-3">Sumber</th>
@@ -1363,7 +1363,7 @@ function SourceCompositionPanel({
                     <div className="flex flex-wrap items-center gap-2">
                       {formatRupiah(item.amount)}
                       {item.amount <= 0 && (
-                        <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-500">
+                        <span className="rounded-full bg-slate-100 px-2 py-1 text-[8.8px] font-bold text-slate-500">
                           Tidak ada data
                         </span>
                       )}
@@ -1423,7 +1423,7 @@ function UnitPositionPanel({
           return (
             <div
               key={unit.unit_name}
-              className={`grid grid-cols-[28px_minmax(120px,0.8fr)_minmax(160px,1.2fr)_auto] items-center gap-3 rounded-[7px] px-3 py-2 ${
+              className={`grid grid-cols-[22.4px_minmax(96px,0.8fr)_minmax(128px,1.2fr)_auto] items-center gap-3 rounded-[5.6px] px-3 py-2 ${
                 selected ? "bg-blue-50" : "bg-white"
               }`}
             >
@@ -1474,7 +1474,7 @@ function InternalContributorsPreview({
   return (
     <div className="jr-table-shell">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[860px] text-left text-sm">
+        <table className="w-full min-w-[688px] text-left text-sm">
           <thead className="jr-table-head">
             <tr>
               <th className="px-4 py-3">Sumber</th>
@@ -1541,31 +1541,31 @@ function SourceTopContributorsPanel({
   if (variant === "spacious" || variant === "dashboard") {
     const containerClass =
       variant === "dashboard"
-        ? "grid h-[370px] auto-rows-fr gap-4 px-1 py-5"
-        : "grid min-h-[260px] auto-rows-fr gap-4 px-1 py-4";
+        ? "grid h-[296px] auto-rows-fr gap-4 px-1 py-5"
+        : "grid min-h-[208px] auto-rows-fr gap-4 px-1 py-4";
 
     return (
       <div className={`${containerClass} ${className}`}>
         {topRows.map((row, index) => (
           <div
             key={`${row.name}-${index}`}
-            className="grid min-h-0 grid-cols-[24px_minmax(108px,0.55fr)_minmax(150px,1.48fr)_minmax(64px,auto)] items-center gap-3 sm:grid-cols-[24px_minmax(116px,0.55fr)_minmax(180px,1.48fr)_minmax(68px,auto)]"
+            className="grid min-h-0 grid-cols-[19.2px_minmax(86.4px,0.55fr)_minmax(120px,1.48fr)_minmax(51.2px,auto)] items-center gap-3 sm:grid-cols-[19.2px_minmax(92.8px,0.55fr)_minmax(144px,1.48fr)_minmax(54.4px,auto)]"
           >
             <span className="text-xs font-bold text-slate-500">
               {index + 1}
             </span>
-            <span className="block min-w-0 whitespace-normal break-words border-r border-[#dce3ed] pr-3 text-right text-[12px] font-semibold leading-4 text-slate-700">
+            <span className="block min-w-0 whitespace-normal break-words border-r border-[#dce3ed] pr-3 text-right text-[9.6px] font-semibold leading-4 text-slate-700">
               {row.name}
             </span>
-            <div className="h-8 overflow-hidden rounded-[4px] bg-[#edf3ff]">
+            <div className="h-8 overflow-hidden rounded-[3.2px] bg-[#edf3ff]">
               <div
-                className="h-full rounded-[4px] bg-[#1f4fea]"
+                className="h-full rounded-[3.2px] bg-[#1f4fea]"
                 style={{
                   width: `${Math.max((row.amount / maxValue) * 100, 12)}%`,
                 }}
               />
             </div>
-            <span className="whitespace-nowrap text-right text-[13px] font-bold tabular-nums text-slate-900">
+            <span className="whitespace-nowrap text-right text-[10.4px] font-bold tabular-nums text-slate-900">
               {formatRupiah(row.amount)}
             </span>
           </div>
@@ -1579,7 +1579,7 @@ function SourceTopContributorsPanel({
       {topRows.map((row, index) => (
         <div
           key={`${row.name}-${index}`}
-          className="grid grid-cols-[28px_minmax(130px,0.9fr)_minmax(160px,1.2fr)_auto] items-center gap-3"
+          className="grid grid-cols-[22.4px_minmax(104px,0.9fr)_minmax(128px,1.2fr)_auto] items-center gap-3"
         >
           <span className="text-xs font-bold text-slate-500">{index + 1}</span>
           <span className="min-w-0 text-xs font-bold text-slate-900">
@@ -1621,9 +1621,9 @@ function SwdklljCompositionPanel({ metrics }: { metrics: SwdklljMetrics }) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-5 2xl:grid-cols-[minmax(0,1fr)_180px]">
+    <div className="grid grid-cols-1 gap-5 2xl:grid-cols-[minmax(0,1fr)_144px]">
       <div>
-        <div className="mb-4 flex h-5 overflow-hidden rounded-[5px] bg-[#eef2f8]">
+        <div className="mb-4 flex h-5 overflow-hidden rounded-[4px] bg-[#eef2f8]">
           {items.map((item) => {
             const percent =
               denominator > 0 ? (item.amount / denominator) * 100 : 0;
@@ -1649,7 +1649,7 @@ function SwdklljCompositionPanel({ metrics }: { metrics: SwdklljMetrics }) {
             return (
               <div
                 key={item.label}
-                className="grid grid-cols-1 items-center gap-2 text-sm sm:grid-cols-[minmax(0,1fr)_minmax(176px,auto)] sm:gap-5"
+                className="grid grid-cols-1 items-center gap-2 text-sm sm:grid-cols-[minmax(0,1fr)_minmax(140.8px,auto)] sm:gap-5"
               >
                 <div className="flex min-w-0 items-center gap-2 font-semibold text-slate-700">
                   <span
@@ -1658,7 +1658,7 @@ function SwdklljCompositionPanel({ metrics }: { metrics: SwdklljMetrics }) {
                   />
                   <span className="min-w-0 break-words">{item.label}</span>
                 </div>
-                <div className="grid grid-cols-[minmax(92px,1fr)_minmax(62px,auto)] items-center gap-5 justify-self-start sm:justify-self-end">
+                <div className="grid grid-cols-[minmax(73.6px,1fr)_minmax(49.6px,auto)] items-center gap-5 justify-self-start sm:justify-self-end">
                   <span className="text-right font-semibold tabular-nums text-slate-900">
                     {formatRupiah(item.amount)}
                   </span>
@@ -1672,11 +1672,11 @@ function SwdklljCompositionPanel({ metrics }: { metrics: SwdklljMetrics }) {
         </div>
       </div>
 
-      <div className="flex min-h-[150px] flex-col items-center justify-center rounded-[8px] border border-[#1f4fea] bg-white p-4 text-center">
+      <div className="flex min-h-[105.6px] flex-col items-center justify-center rounded-[6.4px] border border-[#1f4fea] bg-white p-4 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
           Total SWDKLLJ
         </p>
-        <p className="mt-2 text-2xl font-bold text-slate-950">
+        <p className="mt-2 text-xl font-bold text-slate-950">
           {formatRupiah(metrics.total)}
         </p>
       </div>
@@ -1700,14 +1700,14 @@ function IwkbuComparisonPanel({ metrics }: { metrics: IwkbuMetrics }) {
   }
 
   return (
-    <div className="grid min-h-[260px] grid-cols-[1fr_auto_1fr] items-end gap-8 px-4 pb-3 pt-4">
+    <div className="grid min-h-[184px] grid-cols-[1fr_auto_1fr] items-end gap-6 px-3 pb-3 pt-3">
       <div className="flex flex-col items-center gap-3">
-        <p className="text-lg font-bold text-slate-950">
+        <p className="text-base font-bold text-slate-950">
           {formatRupiah(metrics.previous_total)}
         </p>
-        <div className="flex h-36 w-28 items-end rounded-[7px] bg-[#f1f5f9]">
+        <div className="flex h-32 w-24 items-end rounded-[5.6px] bg-[#f1f5f9]">
           <div
-            className="w-full rounded-[7px] bg-slate-300"
+            className="w-full rounded-[5.6px] bg-slate-300"
             style={{ height: previousHeight }}
           />
         </div>
@@ -1725,9 +1725,9 @@ function IwkbuComparisonPanel({ metrics }: { metrics: IwkbuMetrics }) {
           }`}
         >
           {metrics.growth_pct !== null && metrics.growth_pct < 0 ? (
-            <ArrowDownRight size={22} />
+            <ArrowDownRight size={17.6} />
           ) : (
-            <ArrowUpRight size={22} />
+            <ArrowUpRight size={17.6} />
           )}
         </div>
         <p
@@ -1744,12 +1744,12 @@ function IwkbuComparisonPanel({ metrics }: { metrics: IwkbuMetrics }) {
       </div>
 
       <div className="flex flex-col items-center gap-3">
-        <p className="text-lg font-bold text-slate-950">
+        <p className="text-base font-bold text-slate-950">
           {formatRupiah(metrics.current_total)}
         </p>
-        <div className="flex h-36 w-28 items-end rounded-[7px] bg-[#edf3ff]">
+        <div className="flex h-32 w-24 items-end rounded-[5.6px] bg-[#edf3ff]">
           <div
-            className="w-full rounded-[7px] bg-[#1f4fea]"
+            className="w-full rounded-[5.6px] bg-[#1f4fea]"
             style={{ height: currentHeight }}
           />
         </div>
@@ -1810,12 +1810,12 @@ function IwklCompositionPanel({
     const sin = Math.sin(radians);
     const sx = cx + radius * cos;
     const sy = cy + radius * sin;
-    const mx = cx + (radius + 18) * cos;
-    const my = cy + (radius + 18) * sin;
-    const ex = mx + (cos >= 0 ? 48 : -48);
+    const mx = cx + (radius + 14.4) * cos;
+    const my = cy + (radius + 14.4) * sin;
+    const ex = mx + (cos >= 0 ? 38.4 : -38.4);
     const ey = my;
     const textAnchor = cos >= 0 ? "start" : "end";
-    const textX = ex + (cos >= 0 ? 7 : -7);
+    const textX = ex + (cos >= 0 ? 5.6 : -5.6);
     const color = colors[index % colors.length];
     const percentage = (item.amount / chartTotal) * 100;
     const label =
@@ -1827,25 +1827,25 @@ function IwklCompositionPanel({
           d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
           fill="none"
           stroke={color}
-          strokeWidth={1.5}
+          strokeWidth={1.2}
         />
-        <circle cx={sx} cy={sy} r={3} fill={color} />
+        <circle cx={sx} cy={sy} r={2.4} fill={color} />
         <text
           x={textX}
-          y={ey - 4}
+          y={ey - 3.2}
           textAnchor={textAnchor}
           fill="#0f172a"
-          fontSize={13}
+          fontSize={10.4}
           fontWeight={800}
         >
           {label}, {formatPercent(percentage)}
         </text>
         <text
           x={textX}
-          y={ey + 13}
+          y={ey + 10.4}
           textAnchor={textAnchor}
           fill="#64748b"
-          fontSize={11}
+          fontSize={8.8}
           fontWeight={700}
         >
           {formatRupiah(item.amount)}
@@ -1855,18 +1855,18 @@ function IwklCompositionPanel({
   }
 
   return (
-    <div className="relative flex min-h-[360px] flex-1 items-center justify-center py-6">
-      <div className="h-[360px] w-full">
+    <div className="relative flex min-h-[264px] flex-1 items-center justify-center py-5">
+      <div className="h-[264px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <PieChart margin={{ top: 18, right: 96, bottom: 18, left: 96 }}>
+          <PieChart margin={{ top: 12.8, right: 67.2, bottom: 12.8, left: 67.2 }}>
             <Pie
               data={chartData}
               dataKey="amount"
               nameKey="label"
               cx="50%"
               cy="50%"
-              innerRadius={92}
-              outerRadius={140}
+              innerRadius={65.6}
+              outerRadius={99.2}
               paddingAngle={3}
               label={renderIwklPieLabel}
               labelLine={false}
@@ -1887,7 +1887,7 @@ function IwklCompositionPanel({
         <span className="mt-1 text-lg font-bold text-slate-950">
           {formatRupiah(metrics.total)}
         </span>
-        <span className="mt-1 text-[11px] font-semibold text-slate-500">
+        <span className="mt-1 text-[8.8px] font-semibold text-slate-500">
           {formatNumber(metrics.passenger_count)} penumpang
         </span>
       </div>
@@ -1915,7 +1915,7 @@ function IwklOperatorSummaryPanel({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[600px] text-left text-sm">
+      <table className="w-full min-w-[480px] text-left text-sm">
         <thead className="jr-table-head">
           <tr>
             <th className="px-4 py-3">Jenis / Operator</th>
@@ -1988,7 +1988,7 @@ function CombinedRevenueTable({
   return (
     <div className="jr-table-shell">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[960px] border-collapse text-left text-sm">
+        <table className="w-full min-w-[768px] border-collapse text-left text-sm">
           <thead className="jr-table-head">
             <tr>
               <th className="px-4 py-3 font-bold">Unit/Kantor</th>
@@ -2035,10 +2035,10 @@ function CombinedRevenueTable({
                         month,
                         source,
                       })}
-                      className="inline-flex items-center gap-1 rounded-[7px] border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                      className="inline-flex items-center gap-1 rounded-[5.6px] border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
                     >
                       Lihat Detail
-                      <ExternalLink size={13} />
+                      <ExternalLink size={10.4} />
                     </a>
                   </td>
                 </tr>
@@ -2065,7 +2065,7 @@ function SwdklljTable({
   return (
     <div className="jr-table-shell">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1000px] text-left text-sm">
+        <table className="w-full min-w-[800px] text-left text-sm">
           <thead className="jr-table-head">
             <tr>
               <th className="px-4 py-3">Kantor</th>
@@ -2128,7 +2128,7 @@ function IwkbuTable({
   return (
     <div className="jr-table-shell">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1000px] text-left text-sm">
+        <table className="w-full min-w-[800px] text-left text-sm">
           <thead className="jr-table-head">
             <tr>
               <th className="px-4 py-3">Kantor</th>
@@ -2211,7 +2211,7 @@ function IwklDetailTable({
   return (
     <div className="jr-table-shell">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[860px] text-left text-sm">
+        <table className="w-full min-w-[688px] text-left text-sm">
           <thead className="jr-table-head">
             <tr>
               <th className="px-4 py-3">Jenis / Operator</th>
@@ -2285,7 +2285,7 @@ function IwklOverviewTable({
   return (
     <div className="jr-table-shell">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px] text-left text-sm">
+        <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="jr-table-head">
             <tr>
               <th className="px-4 py-3">Unit/Kantor</th>
@@ -3138,13 +3138,13 @@ export default function PendapatanPage() {
         />
 
         {loading && (
-          <div className="jr-state p-8 text-center text-sm font-semibold text-slate-500">
+          <div className="jr-state p-6 text-center text-sm font-semibold text-slate-500">
             Memuat data pendapatan...
           </div>
         )}
 
         {error && (
-          <div className="rounded-[8px] border border-red-200 bg-red-50 p-5 text-sm font-semibold text-red-700">
+          <div className="rounded-[6.4px] border border-red-200 bg-red-50 p-5 text-sm font-semibold text-red-700">
             {error}
           </div>
         )}

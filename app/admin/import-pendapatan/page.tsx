@@ -165,7 +165,7 @@ function StatusBadge({ status }: { status: StatusType }) {
   if (status === "loading") {
     return (
       <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-        <Loader2 size={14} className="animate-spin" />
+        <Loader2 size={11.2} className="animate-spin" />
         Memproses
       </span>
     );
@@ -174,7 +174,7 @@ function StatusBadge({ status }: { status: StatusType }) {
   if (status === "success") {
     return (
       <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
-        <CheckCircle2 size={14} />
+        <CheckCircle2 size={11.2} />
         Berhasil
       </span>
     );
@@ -183,7 +183,7 @@ function StatusBadge({ status }: { status: StatusType }) {
   if (status === "warning") {
     return (
       <span className="inline-flex items-center gap-2 rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">
-        <AlertTriangle size={14} />
+        <AlertTriangle size={11.2} />
         Ada Warning
       </span>
     );
@@ -192,7 +192,7 @@ function StatusBadge({ status }: { status: StatusType }) {
   if (status === "error") {
     return (
       <span className="inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700">
-        <XCircle size={14} />
+        <XCircle size={11.2} />
         Gagal
       </span>
     );
@@ -215,9 +215,9 @@ function MetricBox({
   type?: "number" | "rupiah";
 }) {
   return (
-    <div className="rounded-[8px] border border-[#dce3ed] bg-[#f8fafc] p-4">
+    <div className="rounded-[6.4px] border border-[#dce3ed] bg-[#f8fafc] p-4">
       <p className="jr-label">{label}</p>
-      <p className="mt-2 text-xl font-semibold text-slate-950">
+      <p className="mt-2 text-lg font-semibold text-slate-950">
         {type === "rupiah"
           ? formatRupiah(value ?? 0)
           : formatNumber(value ?? 0)}
@@ -325,14 +325,14 @@ function IssueList({
 
   if (issues.length === 0) {
     return (
-      <div className="rounded-[8px] border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700">
+      <div className="rounded-[6.4px] border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700">
         Tidak ada {title.toLowerCase()}.
       </div>
     );
   }
 
   return (
-    <div className={`overflow-hidden rounded-[8px] border ${tone.panel}`}>
+    <div className={`overflow-hidden rounded-[6.4px] border ${tone.panel}`}>
       <div
         className={`flex items-center justify-between gap-3 border-b px-4 py-3 ${tone.headerBorder}`}
       >
@@ -381,31 +381,31 @@ function AuditSummary({ logs }: { logs: SyncLogRow[] }) {
         title="Log Ditampilkan"
         value={formatNumber(logs.length)}
         subtitle="Sesuai filter aktif"
-        icon={<ClipboardList size={22} />}
+        icon={<ClipboardList size={17.6} />}
       />
       <KpiCard
         title="Berhasil"
         value={formatNumber(successCount)}
         subtitle="Sync sukses"
-        icon={<CheckCircle2 size={22} />}
+        icon={<CheckCircle2 size={17.6} />}
       />
       <KpiCard
         title="Ada Warning"
         value={formatNumber(warningCount)}
         subtitle="Sync dengan catatan"
-        icon={<AlertTriangle size={22} />}
+        icon={<AlertTriangle size={17.6} />}
       />
       <KpiCard
         title="Gagal"
         value={formatNumber(failedCount)}
         subtitle="Sync gagal"
-        icon={<XCircle size={22} />}
+        icon={<XCircle size={17.6} />}
       />
       <KpiCard
         title="Terakhir Sync"
         value={latestLog ? formatDateTime(latestLog.created_at) : "-"}
         subtitle={`${formatNumber(totalRows)} row terbaca`}
-        icon={<Clock size={22} />}
+        icon={<Clock size={17.6} />}
       />
     </div>
   );
@@ -510,7 +510,7 @@ function SyncLogDetailPanel({ log }: { log: SyncLogRow | null }) {
       </div>
 
       <div className="space-y-3">
-        <div className="rounded-[8px] bg-[#f8fafc] p-3">
+        <div className="rounded-[6.4px] bg-[#f8fafc] p-3">
           <p className="text-xs font-semibold text-slate-500">Message</p>
           <p className="mt-1 text-sm font-bold leading-6 text-slate-800">
             {log.message ?? "-"}
@@ -524,7 +524,7 @@ function SyncLogDetailPanel({ log }: { log: SyncLogRow | null }) {
           <MetricBox label="Pendapatan" value={totalRevenue} type="rupiah" />
         </div>
 
-        <div className="rounded-[8px] border border-[#dce3ed]">
+        <div className="rounded-[6.4px] border border-[#dce3ed]">
           <div className="border-b border-[#dce3ed] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
             Row Counts
           </div>
@@ -556,7 +556,7 @@ function SyncLogDetailPanel({ log }: { log: SyncLogRow | null }) {
           </div>
         </div>
 
-        <div className="rounded-[8px] border border-[#dce3ed]">
+        <div className="rounded-[6.4px] border border-[#dce3ed]">
           <div className="border-b border-[#dce3ed] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
             Identitas Sync
           </div>
@@ -590,7 +590,7 @@ function SyncLogDetailPanel({ log }: { log: SyncLogRow | null }) {
           href={`/pendapatan?year=${log.period_year}&month=${log.period_month}`}
           className="jr-button-primary w-full"
         >
-          <Eye size={16} />
+          <Eye size={12.8} />
           Buka Dashboard Periode
         </a>
       </div>
@@ -609,7 +609,7 @@ function SyncLogTable({
 }) {
   if (logs.length === 0) {
     return (
-      <div className="jr-state border-dashed p-8 text-center text-sm font-semibold text-slate-500">
+      <div className="jr-state border-dashed p-6 text-center text-sm font-semibold text-slate-500">
         Tidak ada riwayat sync pendapatan yang sesuai filter.
       </div>
     );
@@ -618,7 +618,7 @@ function SyncLogTable({
   return (
     <div className="jr-table-shell">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1000px] text-left text-sm">
+        <table className="w-full min-w-[800px] text-left text-sm">
           <thead className="jr-table-head">
             <tr>
               <th className="px-4 py-3">Periode</th>
@@ -661,7 +661,7 @@ function SyncLogTable({
                     </span>
                   </td>
 
-                  <td className="max-w-[280px] px-4 py-3 text-slate-600">
+                  <td className="max-w-[224px] px-4 py-3 text-slate-600">
                     <p className="line-clamp-2">{log.message ?? "-"}</p>
                   </td>
 
@@ -687,7 +687,7 @@ function SyncLogTable({
                       onClick={() => onSelectLog(log)}
                       className="inline-flex items-center gap-1 rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100"
                     >
-                      <ClipboardList size={13} />
+                      <ClipboardList size={10.4} />
                       Detail
                     </button>
                   </td>
@@ -926,9 +926,9 @@ export default function ImportPendapatanPage() {
                 className="jr-button-soft w-full disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isValidating ? (
-                  <Loader2 size={17} className="animate-spin" />
+                  <Loader2 size={13.6} className="animate-spin" />
                 ) : (
-                  <FileCheck2 size={17} />
+                  <FileCheck2 size={13.6} />
                 )}
                 Cek dan Validasi Data
               </button>
@@ -947,7 +947,7 @@ export default function ImportPendapatanPage() {
               </div>
 
               <div
-                className={`rounded-[8px] border p-4 text-sm font-semibold ${
+                className={`rounded-[6.4px] border p-4 text-sm font-semibold ${
                   validateResult.success
                     ? warnings.length > 0
                       ? "border-orange-200 bg-orange-50 text-orange-700"
@@ -1008,7 +1008,7 @@ export default function ImportPendapatanPage() {
                   onClick={handleReset}
                   className="jr-button-secondary w-full sm:w-auto"
                 >
-                  <RefreshCcw size={17} />
+                  <RefreshCcw size={13.6} />
                   Reset Data
                 </button>
 
@@ -1018,9 +1018,9 @@ export default function ImportPendapatanPage() {
                   className="jr-button-primary w-full disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                 >
                   {isSyncing ? (
-                    <Loader2 size={17} className="animate-spin" />
+                    <Loader2 size={13.6} className="animate-spin" />
                   ) : (
-                    <CloudUpload size={17} />
+                    <CloudUpload size={13.6} />
                   )}
                   Sync ke Database
                 </button>
@@ -1037,7 +1037,7 @@ export default function ImportPendapatanPage() {
             }
           >
             <div
-              className={`rounded-[8px] border p-4 text-sm font-semibold ${
+              className={`rounded-[6.4px] border p-4 text-sm font-semibold ${
                 syncResult.success
                   ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                   : "border-red-200 bg-red-50 text-red-700"
@@ -1051,7 +1051,7 @@ export default function ImportPendapatanPage() {
               <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
                 <MetricBox label="Tahun" value={syncResult.period_year} />
                 <MetricBox label="Bulan" value={syncResult.period_month} />
-                <div className="rounded-[8px] border border-[#dce3ed] bg-[#f8fafc] p-4">
+                <div className="rounded-[6.4px] border border-[#dce3ed] bg-[#f8fafc] p-4">
                   <p className="text-xs font-semibold text-slate-500">
                     Batch ID
                   </p>
@@ -1078,11 +1078,11 @@ export default function ImportPendapatanPage() {
             <AuditSummary logs={syncLogs} />
 
             {isLoadingLogs ? (
-              <div className="jr-state p-8 text-center text-sm font-semibold text-slate-500">
+              <div className="jr-state p-6 text-center text-sm font-semibold text-slate-500">
                 Memuat riwayat sync...
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_304px]">
                 <SyncLogTable
                   logs={syncLogs}
                   selectedLogId={selectedLogId}
