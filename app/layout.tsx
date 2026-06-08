@@ -7,7 +7,9 @@ export const metadata: Metadata = {
   title: "SAKTI JR-JATIM",
   description: "Dashboard monitoring Jasa Raharja Jawa Timur",
   icons: {
-    icon: "/images/logo-jasa-raharja.png",
+    icon: [{ url: "/images/logo-jasa-raharja.png", type: "image/png" }],
+    shortcut: [{ url: "/images/logo-jasa-raharja.png", type: "image/png" }],
+    apple: [{ url: "/images/logo-jasa-raharja.png", type: "image/png" }],
   },
 };
 
