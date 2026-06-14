@@ -36,12 +36,10 @@ export async function GET() {
     });
 
     const ranges = [
-      "SWDKLLJ!A:G",
-      "SWDKLLJ_Detail!A:H",
-      "IWKBU!A:G",
-      "IWKBU_Detail!A:H",
-      "IWKL!A:C",
-      "IWKL_Detail!A:D",
+      "SWDKLLJ!A:H",
+      "IWKBU!A:H",
+      "IWKL_Cabang!A:C",
+      "IWKL_Jenis!A:C",
     ];
 
     const response = await sheets.spreadsheets.values.batchGet({

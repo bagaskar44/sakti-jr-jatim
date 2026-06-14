@@ -1,6 +1,4 @@
-create extension if not exists pgcrypto;
-
-create or replace function public.set_updated_at()
+create function public.set_updated_at()
 returns trigger
 language plpgsql
 as $$
@@ -10,7 +8,7 @@ begin
 end;
 $$;
 
-create table if not exists public.profiles (
+create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text,
   role text not null default 'VIEWER',
@@ -21,19 +19,12 @@ create table if not exists public.profiles (
   )
 );
 
-alter table public.profiles add column if not exists full_name text;
-alter table public.profiles add column if not exists role text not null default 'VIEWER';
-alter table public.profiles add column if not exists created_at timestamptz not null default now();
-alter table public.profiles add column if not exists updated_at timestamptz not null default now();
-
-drop trigger if exists trg_profiles_updated_at on public.profiles;
-
 create trigger trg_profiles_updated_at
 before update on public.profiles
 for each row
 execute function public.set_updated_at();
 
-create or replace function public.handle_new_user_profile()
+create function public.handle_new_user_profile()
 returns trigger
 language plpgsql
 security definer
@@ -52,8 +43,6 @@ begin
 end;
 $$;
 
-drop trigger if exists on_auth_user_created_create_profile on auth.users;
-
 create trigger on_auth_user_created_create_profile
 after insert on auth.users
 for each row
@@ -61,26 +50,13 @@ execute function public.handle_new_user_profile();
 
 alter table public.profiles enable row level security;
 
-do $$
-begin
-  if not exists (
-    select 1
-    from pg_policies
-    where schemaname = 'public'
-      and tablename = 'profiles'
-      and policyname = 'profiles_select_own'
-  ) then
-    execute '
-      create policy profiles_select_own
-      on public.profiles
-      for select
-      to authenticated
-      using (auth.uid() = id)
-    ';
-  end if;
-end $$;
+create policy profiles_select_own
+on public.profiles
+for select
+to authenticated
+using (auth.uid() = id);
 
-create table if not exists public.revenue_import_batches (
+create table public.revenue_import_batches (
   id uuid primary key default gen_random_uuid(),
   module text not null default 'pendapatan',
   period_year integer not null,
@@ -103,12 +79,12 @@ create table if not exists public.revenue_import_batches (
   )
 );
 
-create table if not exists public.revenue_swdkllj (
+create table public.revenue_swdkllj (
   id uuid primary key default gen_random_uuid(),
   batch_id uuid not null references public.revenue_import_batches(id) on delete cascade,
   unit_name text not null,
-  parent_unit_name text,
-  level text not null,
+  parent_unit_name text not null,
+  level text not null default 'DETAIL',
   kd numeric not null default 0,
   sw numeric not null default 0,
   denda numeric not null default 0,
@@ -118,12 +94,12 @@ create table if not exists public.revenue_swdkllj (
   created_at timestamptz not null default now()
 );
 
-create table if not exists public.revenue_iwkbu (
+create table public.revenue_iwkbu (
   id uuid primary key default gen_random_uuid(),
   batch_id uuid not null references public.revenue_import_batches(id) on delete cascade,
   unit_name text not null,
-  parent_unit_name text,
-  level text not null,
+  parent_unit_name text not null,
+  level text not null default 'DETAIL',
   ask_last_year numeric not null default 0,
   iwkbu_last_year numeric not null default 0,
   ask_current_year numeric not null default 0,
@@ -133,7 +109,7 @@ create table if not exists public.revenue_iwkbu (
   created_at timestamptz not null default now()
 );
 
-create table if not exists public.revenue_iwkl (
+create table public.revenue_iwkl_cabang (
   id uuid primary key default gen_random_uuid(),
   batch_id uuid not null references public.revenue_import_batches(id) on delete cascade,
   unit_name text not null,
@@ -142,17 +118,16 @@ create table if not exists public.revenue_iwkl (
   created_at timestamptz not null default now()
 );
 
-create table if not exists public.revenue_iwkl_details (
+create table public.revenue_iwkl_jenis (
   id uuid primary key default gen_random_uuid(),
   batch_id uuid not null references public.revenue_import_batches(id) on delete cascade,
-  parent_unit_name text not null,
   detail_type text not null,
   passenger_count numeric not null default 0,
   nominal numeric not null default 0,
   created_at timestamptz not null default now()
 );
 
-create table if not exists public.revenue_sync_logs (
+create table public.revenue_sync_logs (
   id uuid primary key default gen_random_uuid(),
   batch_id uuid references public.revenue_import_batches(id) on delete set null,
   period_year integer not null,
@@ -173,56 +148,53 @@ create table if not exists public.revenue_sync_logs (
   )
 );
 
-create index if not exists revenue_import_batches_period_idx
+create index revenue_import_batches_period_idx
   on public.revenue_import_batches(module, period_year, period_month);
 
-create index if not exists revenue_import_batches_created_at_idx
+create index revenue_import_batches_created_at_idx
   on public.revenue_import_batches(created_at desc);
 
-create index if not exists revenue_swdkllj_batch_id_idx
+create index revenue_swdkllj_batch_id_idx
   on public.revenue_swdkllj(batch_id);
 
-create index if not exists revenue_swdkllj_unit_name_idx
+create index revenue_swdkllj_unit_name_idx
   on public.revenue_swdkllj(unit_name);
 
-create index if not exists revenue_swdkllj_parent_unit_name_idx
+create index revenue_swdkllj_parent_unit_name_idx
   on public.revenue_swdkllj(parent_unit_name);
 
-create index if not exists revenue_swdkllj_level_idx
+create index revenue_swdkllj_level_idx
   on public.revenue_swdkllj(level);
 
-create index if not exists revenue_iwkbu_batch_id_idx
+create index revenue_iwkbu_batch_id_idx
   on public.revenue_iwkbu(batch_id);
 
-create index if not exists revenue_iwkbu_unit_name_idx
+create index revenue_iwkbu_unit_name_idx
   on public.revenue_iwkbu(unit_name);
 
-create index if not exists revenue_iwkbu_parent_unit_name_idx
+create index revenue_iwkbu_parent_unit_name_idx
   on public.revenue_iwkbu(parent_unit_name);
 
-create index if not exists revenue_iwkbu_level_idx
+create index revenue_iwkbu_level_idx
   on public.revenue_iwkbu(level);
 
-create index if not exists revenue_iwkl_batch_id_idx
-  on public.revenue_iwkl(batch_id);
+create index revenue_iwkl_cabang_batch_id_idx
+  on public.revenue_iwkl_cabang(batch_id);
 
-create index if not exists revenue_iwkl_unit_name_idx
-  on public.revenue_iwkl(unit_name);
+create index revenue_iwkl_cabang_unit_name_idx
+  on public.revenue_iwkl_cabang(unit_name);
 
-create index if not exists revenue_iwkl_details_batch_id_idx
-  on public.revenue_iwkl_details(batch_id);
+create index revenue_iwkl_jenis_batch_id_idx
+  on public.revenue_iwkl_jenis(batch_id);
 
-create index if not exists revenue_iwkl_details_parent_unit_name_idx
-  on public.revenue_iwkl_details(parent_unit_name);
+create index revenue_iwkl_jenis_detail_type_idx
+  on public.revenue_iwkl_jenis(detail_type);
 
-create index if not exists revenue_sync_logs_period_idx
+create index revenue_sync_logs_period_idx
   on public.revenue_sync_logs(period_year, period_month);
 
-create index if not exists revenue_sync_logs_created_at_idx
+create index revenue_sync_logs_created_at_idx
   on public.revenue_sync_logs(created_at desc);
-
-drop trigger if exists trg_revenue_import_batches_updated_at
-  on public.revenue_import_batches;
 
 create trigger trg_revenue_import_batches_updated_at
 before update on public.revenue_import_batches
@@ -232,18 +204,9 @@ execute function public.set_updated_at();
 alter table public.revenue_import_batches enable row level security;
 alter table public.revenue_swdkllj enable row level security;
 alter table public.revenue_iwkbu enable row level security;
-alter table public.revenue_iwkl enable row level security;
-alter table public.revenue_iwkl_details enable row level security;
+alter table public.revenue_iwkl_cabang enable row level security;
+alter table public.revenue_iwkl_jenis enable row level security;
 alter table public.revenue_sync_logs enable row level security;
-
-drop view if exists public.v_revenue_latest_batch cascade;
-drop view if exists public.v_revenue_overview_monthly cascade;
-drop view if exists public.v_revenue_source_composition cascade;
-drop view if exists public.v_revenue_by_unit_monthly cascade;
-drop view if exists public.v_revenue_swdkllj_monthly cascade;
-drop view if exists public.v_revenue_iwkbu_monthly cascade;
-drop view if exists public.v_revenue_iwkl_monthly cascade;
-drop view if exists public.v_revenue_iwkl_detail_monthly cascade;
 
 create view public.v_revenue_latest_batch as
 select
@@ -278,12 +241,44 @@ select
   swd.setor_adjustment,
   swd.total,
   swd.transaction_count,
-  swd.level = 'CABANG_SUMMARY' as is_drillable
+  false as is_drillable
 from public.revenue_swdkllj swd
 join public.revenue_import_batches batch
   on batch.id = swd.batch_id
 where batch.module = 'pendapatan'
-  and batch.status = 'processed';
+  and batch.status = 'processed'
+
+union all
+
+select
+  null::uuid as id,
+  swd.batch_id,
+  batch.period_year,
+  batch.period_month,
+  batch.period_date,
+  batch.created_at as uploaded_at,
+  swd.parent_unit_name as unit_name,
+  null::text as parent_unit_name,
+  'PARENT_SUMMARY'::text as level,
+  sum(swd.kd) as kd,
+  sum(swd.sw) as sw,
+  sum(swd.denda) as denda,
+  sum(swd.setor_adjustment) as setor_adjustment,
+  sum(swd.total) as total,
+  sum(swd.transaction_count) as transaction_count,
+  true as is_drillable
+from public.revenue_swdkllj swd
+join public.revenue_import_batches batch
+  on batch.id = swd.batch_id
+where batch.module = 'pendapatan'
+  and batch.status = 'processed'
+group by
+  swd.batch_id,
+  batch.period_year,
+  batch.period_month,
+  batch.period_date,
+  batch.created_at,
+  swd.parent_unit_name;
 
 create view public.v_revenue_iwkbu_monthly as
 select
@@ -302,14 +297,54 @@ select
   iwk.iwkbu_current_year,
   iwk.ask_activity_pct,
   iwk.iwkbu_activity_pct,
-  iwk.level = 'SUMMARY' as is_drillable
+  false as is_drillable
 from public.revenue_iwkbu iwk
 join public.revenue_import_batches batch
   on batch.id = iwk.batch_id
 where batch.module = 'pendapatan'
-  and batch.status = 'processed';
+  and batch.status = 'processed'
 
-create view public.v_revenue_iwkl_monthly as
+union all
+
+select
+  null::uuid as id,
+  iwk.batch_id,
+  batch.period_year,
+  batch.period_month,
+  batch.period_date,
+  batch.created_at as uploaded_at,
+  iwk.parent_unit_name as unit_name,
+  null::text as parent_unit_name,
+  'PARENT_SUMMARY'::text as level,
+  sum(iwk.ask_last_year) as ask_last_year,
+  sum(iwk.iwkbu_last_year) as iwkbu_last_year,
+  sum(iwk.ask_current_year) as ask_current_year,
+  sum(iwk.iwkbu_current_year) as iwkbu_current_year,
+  case
+    when sum(iwk.ask_last_year) > 0 then
+      ((sum(iwk.ask_current_year) - sum(iwk.ask_last_year)) / sum(iwk.ask_last_year)) * 100
+    else 0
+  end as ask_activity_pct,
+  case
+    when sum(iwk.iwkbu_last_year) > 0 then
+      ((sum(iwk.iwkbu_current_year) - sum(iwk.iwkbu_last_year)) / sum(iwk.iwkbu_last_year)) * 100
+    else 0
+  end as iwkbu_activity_pct,
+  true as is_drillable
+from public.revenue_iwkbu iwk
+join public.revenue_import_batches batch
+  on batch.id = iwk.batch_id
+where batch.module = 'pendapatan'
+  and batch.status = 'processed'
+group by
+  iwk.batch_id,
+  batch.period_year,
+  batch.period_month,
+  batch.period_date,
+  batch.created_at,
+  iwk.parent_unit_name;
+
+create view public.v_revenue_iwkl_cabang_monthly as
 select
   iwkl.id,
   iwkl.batch_id,
@@ -321,27 +356,26 @@ select
   iwkl.passenger_count,
   iwkl.nominal,
   true as is_drillable
-from public.revenue_iwkl iwkl
+from public.revenue_iwkl_cabang iwkl
 join public.revenue_import_batches batch
   on batch.id = iwkl.batch_id
 where batch.module = 'pendapatan'
   and batch.status = 'processed';
 
-create view public.v_revenue_iwkl_detail_monthly as
+create view public.v_revenue_iwkl_jenis_monthly as
 select
-  detail.id,
-  detail.batch_id,
+  jenis.id,
+  jenis.batch_id,
   batch.period_year,
   batch.period_month,
   batch.period_date,
   batch.created_at as uploaded_at,
-  detail.parent_unit_name,
-  detail.detail_type,
-  detail.passenger_count,
-  detail.nominal
-from public.revenue_iwkl_details detail
+  jenis.detail_type,
+  jenis.passenger_count,
+  jenis.nominal
+from public.revenue_iwkl_jenis jenis
 join public.revenue_import_batches batch
-  on batch.id = detail.batch_id
+  on batch.id = jenis.batch_id
 where batch.module = 'pendapatan'
   and batch.status = 'processed';
 
@@ -367,7 +401,7 @@ iwkl as (
     batch_id,
     sum(nominal) as iwkl_total,
     sum(passenger_count) as iwkl_passenger_count
-  from public.revenue_iwkl
+  from public.revenue_iwkl_cabang
   group by batch_id
 )
 select
@@ -438,7 +472,7 @@ select
   batch.period_month,
   'IWKL'::text as source_name,
   sum(iwkl.nominal) as amount
-from public.revenue_iwkl iwkl
+from public.revenue_iwkl_cabang iwkl
 join public.revenue_import_batches batch
   on batch.id = iwkl.batch_id
 where batch.module = 'pendapatan'
@@ -450,7 +484,7 @@ with unit_sources as (
   select
     batch.period_year,
     batch.period_month,
-    swd.unit_name,
+    swd.parent_unit_name as unit_name,
     sum(swd.total) as swdkllj_total,
     0::numeric as iwkbu_total,
     0::numeric as iwkl_total,
@@ -462,14 +496,14 @@ with unit_sources as (
     on batch.id = swd.batch_id
   where batch.module = 'pendapatan'
     and batch.status = 'processed'
-  group by batch.period_year, batch.period_month, swd.unit_name
+  group by batch.period_year, batch.period_month, swd.parent_unit_name
 
   union all
 
   select
     batch.period_year,
     batch.period_month,
-    iwk.unit_name,
+    iwk.parent_unit_name as unit_name,
     0::numeric as swdkllj_total,
     sum(iwk.iwkbu_current_year) as iwkbu_total,
     0::numeric as iwkl_total,
@@ -481,7 +515,7 @@ with unit_sources as (
     on batch.id = iwk.batch_id
   where batch.module = 'pendapatan'
     and batch.status = 'processed'
-  group by batch.period_year, batch.period_month, iwk.unit_name
+  group by batch.period_year, batch.period_month, iwk.parent_unit_name
 
   union all
 
@@ -495,7 +529,7 @@ with unit_sources as (
     0::numeric as swdkllj_transaction_count,
     sum(iwkl.passenger_count) as iwkl_passenger_count,
     0::numeric as iwkbu_last_year_total
-  from public.revenue_iwkl iwkl
+  from public.revenue_iwkl_cabang iwkl
   join public.revenue_import_batches batch
     on batch.id = iwkl.batch_id
   where batch.module = 'pendapatan'
@@ -524,23 +558,14 @@ select
 from unit_sources
 group by period_year, period_month, unit_name;
 
-update public.master_units unit
-set is_active = false
-where unit.unit_type = 'OPERATOR'
-  and exists (
-    select 1
-    from public.revenue_iwkl_details detail
-    where upper(trim(detail.detail_type)) = unit.canonical_name
-  );
-
 grant select on public.profiles to authenticated;
 grant select, insert, update, delete on public.profiles to service_role;
 
 grant select, insert, update, delete on public.revenue_import_batches to service_role;
 grant select, insert, update, delete on public.revenue_swdkllj to service_role;
 grant select, insert, update, delete on public.revenue_iwkbu to service_role;
-grant select, insert, update, delete on public.revenue_iwkl to service_role;
-grant select, insert, update, delete on public.revenue_iwkl_details to service_role;
+grant select, insert, update, delete on public.revenue_iwkl_cabang to service_role;
+grant select, insert, update, delete on public.revenue_iwkl_jenis to service_role;
 grant select, insert, update, delete on public.revenue_sync_logs to service_role;
 
 grant select on public.v_revenue_latest_batch to service_role;
@@ -549,5 +574,5 @@ grant select on public.v_revenue_source_composition to service_role;
 grant select on public.v_revenue_by_unit_monthly to service_role;
 grant select on public.v_revenue_swdkllj_monthly to service_role;
 grant select on public.v_revenue_iwkbu_monthly to service_role;
-grant select on public.v_revenue_iwkl_monthly to service_role;
-grant select on public.v_revenue_iwkl_detail_monthly to service_role;
+grant select on public.v_revenue_iwkl_cabang_monthly to service_role;
+grant select on public.v_revenue_iwkl_jenis_monthly to service_role;

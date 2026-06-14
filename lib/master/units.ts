@@ -63,11 +63,9 @@ type SanitizedMasterUnitPayload = {
 
 type RevenueRows = {
   swdkllj: Record<string, unknown>[];
-  swdklljDetail: Record<string, unknown>[];
   iwkbu: Record<string, unknown>[];
-  iwkbuDetail: Record<string, unknown>[];
-  iwkl: Record<string, unknown>[];
-  iwklDetail: Record<string, unknown>[];
+  iwklCabang: Record<string, unknown>[];
+  iwklJenis: Record<string, unknown>[];
 };
 
 type ValidationWarning = {
@@ -524,8 +522,7 @@ export async function seedMasterUnitsFromRevenue(supabase: SupabaseClient) {
   const [
     swdklljResult,
     iwkbuResult,
-    iwklResult,
-    iwklDetailResult,
+    iwklCabangResult,
     unitsResult,
     aliasesResult,
   ] = await Promise.all([
@@ -535,10 +532,7 @@ export async function seedMasterUnitsFromRevenue(supabase: SupabaseClient) {
     supabase
       .from("revenue_iwkbu")
       .select("unit_name, parent_unit_name, level"),
-    supabase.from("revenue_iwkl").select("unit_name"),
-    supabase
-      .from("revenue_iwkl_details")
-      .select("parent_unit_name"),
+    supabase.from("revenue_iwkl_cabang").select("unit_name"),
     supabase
       .from("master_units")
       .select("id, canonical_name, parent_unit_id"),
@@ -548,8 +542,7 @@ export async function seedMasterUnitsFromRevenue(supabase: SupabaseClient) {
   const firstError =
     swdklljResult.error ||
     iwkbuResult.error ||
-    iwklResult.error ||
-    iwklDetailResult.error ||
+    iwklCabangResult.error ||
     unitsResult.error ||
     aliasesResult.error;
 
@@ -584,17 +577,8 @@ export async function seedMasterUnitsFromRevenue(supabase: SupabaseClient) {
     );
   }
 
-  for (const row of iwklResult.data ?? []) {
+  for (const row of iwklCabangResult.data ?? []) {
     addCandidate(candidates, row.unit_name, inferUnitType(row.unit_name));
-  }
-
-  for (const row of iwklDetailResult.data ?? []) {
-    addCandidate(
-      candidates,
-      row.parent_unit_name,
-      inferUnitType(row.parent_unit_name),
-      null
-    );
   }
 
   const existingUnits = (unitsResult.data ?? []) as {
@@ -800,49 +784,25 @@ export async function resolveRevenueRowsWithMasterUnits(
   }
 
   for (const row of rows.swdkllj) {
+    row.parent_unit_name = resolveName(
+      "SWDKLLJ",
+      "parent_unit_name",
+      row.parent_unit_name
+    );
     row.unit_name = resolveName("SWDKLLJ", "unit_name", row.unit_name);
   }
 
-  for (const row of rows.swdklljDetail) {
+  for (const row of rows.iwkbu) {
     row.parent_unit_name = resolveName(
-      "SWDKLLJ_Detail",
+      "IWKBU",
       "parent_unit_name",
       row.parent_unit_name
     );
-    row.unit_name = resolveName(
-      "SWDKLLJ_Detail",
-      "unit_name",
-      row.unit_name
-    );
-  }
-
-  for (const row of rows.iwkbu) {
     row.unit_name = resolveName("IWKBU", "unit_name", row.unit_name);
   }
 
-  for (const row of rows.iwkbuDetail) {
-    row.parent_unit_name = resolveName(
-      "IWKBU_Detail",
-      "parent_unit_name",
-      row.parent_unit_name
-    );
-    row.unit_name = resolveName(
-      "IWKBU_Detail",
-      "unit_name",
-      row.unit_name
-    );
-  }
-
-  for (const row of rows.iwkl) {
-    row.unit_name = resolveName("IWKL", "unit_name", row.unit_name);
-  }
-
-  for (const row of rows.iwklDetail) {
-    row.parent_unit_name = resolveName(
-      "IWKL_Detail",
-      "parent_unit_name",
-      row.parent_unit_name
-    );
+  for (const row of rows.iwklCabang) {
+    row.unit_name = resolveName("IWKL_Cabang", "unit_name", row.unit_name);
   }
 
   const missingRows = [...missing.values()];

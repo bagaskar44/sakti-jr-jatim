@@ -5,7 +5,7 @@ import { resolveRevenuePeriod } from "@/lib/dashboard/period";
 export const dynamic = "force-dynamic";
 
 type IwklDetailRow = {
-  parent_unit_name: string;
+  parent_unit_name?: string | null;
   detail_type: string;
   passenger_count: number | string | null;
   nominal: number | string | null;
@@ -22,7 +22,7 @@ function aggregateDetailsByType(rows: IwklDetailRow[]) {
   for (const row of rows) {
     const detailType = String(row.detail_type ?? "").trim() || "LAINNYA";
     const current = byType.get(detailType) ?? {
-      parent_unit_name: "JAWA TIMUR",
+      parent_unit_name: "KANTOR WILAYAH JAWA TIMUR",
       detail_type: detailType,
       passenger_count: 0,
       nominal: 0,
@@ -59,31 +59,29 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const parent = searchParams.get("parent");
 
-    const { data: summary, error: summaryError } = await supabase
-      .from("v_revenue_iwkl_monthly")
+    let summaryQuery = supabase
+      .from("v_revenue_iwkl_cabang_monthly")
       .select("*")
       .eq("period_year", period.periodYear)
       .eq("period_month", period.periodMonth)
       .order("nominal", { ascending: false });
 
+    if (parent && parent.trim()) {
+      summaryQuery = summaryQuery.eq("unit_name", parent.trim());
+    }
+
+    const { data: summary, error: summaryError } = await summaryQuery;
+
     if (summaryError) {
       throw new Error(summaryError.message);
     }
 
-    let detailQuery = supabase
-      .from("v_revenue_iwkl_detail_monthly")
+    const { data: detailRows, error: detailError } = await supabase
+      .from("v_revenue_iwkl_jenis_monthly")
       .select("*")
       .eq("period_year", period.periodYear)
-      .eq("period_month", period.periodMonth);
-
-    if (parent && parent.trim()) {
-      detailQuery = detailQuery.eq("parent_unit_name", parent.trim());
-    }
-
-    const { data: detailRows, error: detailError } = await detailQuery.order(
-      "nominal",
-      { ascending: false }
-    );
+      .eq("period_month", period.periodMonth)
+      .order("nominal", { ascending: false });
 
     if (detailError) {
       throw new Error(detailError.message);
@@ -91,7 +89,12 @@ export async function GET(request: Request) {
 
     const details =
       parent && parent.trim()
-        ? detailRows ?? []
+        ? (summary ?? []).map((row) => ({
+            parent_unit_name: row.unit_name,
+            detail_type: row.unit_name,
+            passenger_count: row.passenger_count,
+            nominal: row.nominal,
+          }))
         : aggregateDetailsByType((detailRows ?? []) as IwklDetailRow[]);
 
     return NextResponse.json({

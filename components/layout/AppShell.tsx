@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import {
   AlertCircle,
@@ -10,8 +10,10 @@ import {
   CalendarDays,
   ChevronRight,
   LayoutDashboard,
+  LogOut,
   Menu,
   UploadCloud,
+  UserCircle2,
   Users,
   WalletCards,
   X,
@@ -112,13 +114,68 @@ function isActivePath(pathname: string, href: string) {
   return pathname.startsWith(href);
 }
 
+function getRoleLabel(role: AppRole | null) {
+  if (role === "ADMIN_KANWIL") return "Admin Kanwil";
+  if (role === "ADMIN_LOKET") return "Admin Loket";
+  if (role === "VIEWER") return "Viewer";
+
+  return "User";
+}
+
+function SidebarUserCard({
+  role,
+  fullName,
+  userEmail,
+  onLogout,
+}: {
+  role: AppRole | null;
+  fullName: string | null;
+  userEmail: string | null;
+  onLogout: () => void;
+}) {
+  return (
+    <div className="shrink-0 border-t border-white/[0.08] px-3 pb-4 pt-3">
+      <div className="flex min-h-[52px] items-center gap-3 rounded-[6.4px] border border-white/[0.08] bg-white/[0.06] px-3 py-2.5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[5.6px] bg-[#1f4fea]/15 text-[#8fb0ff] ring-1 ring-[#1f4fea]/25">
+          <UserCircle2 size={14.4} />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-white">
+            {fullName ?? userEmail ?? "User"}
+          </p>
+          <p className="truncate text-xs font-medium text-slate-400">
+            {getRoleLabel(role)}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onLogout}
+          className="shrink-0 rounded-[5.6px] p-1.5 text-slate-500 transition hover:bg-white/10 hover:text-red-200"
+          title="Logout"
+          aria-label="Logout"
+        >
+          <LogOut size={12.8} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function SidebarContent({
   pathname,
   role,
+  fullName,
+  userEmail,
+  onLogout,
   onNavigate,
 }: {
   pathname: string;
   role: AppRole | null;
+  fullName: string | null;
+  userEmail: string | null;
+  onLogout: () => void;
   onNavigate?: () => void;
 }) {
   const canAccessAdmin = role === "ADMIN_KANWIL";
@@ -199,20 +256,31 @@ function SidebarContent({
         )}
       </div>
 
+      <SidebarUserCard
+        role={role}
+        fullName={fullName}
+        userEmail={userEmail}
+        onLogout={onLogout}
+      />
     </div>
   );
 }
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [role, setRole] = useState<AppRole | null>(null);
+  const [fullName, setFullName] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadUserRole() {
+    async function loadUserProfile() {
       if (pathname === "/login") {
         setRole(null);
+        setFullName(null);
+        setUserEmail(null);
         return;
       }
 
@@ -224,20 +292,37 @@ export function AppShell({ children }: AppShellProps) {
 
       if (!user) {
         setRole(null);
+        setFullName(null);
+        setUserEmail(null);
         return;
       }
 
+      setUserEmail(user.email ?? null);
+
       const { data: profile } = await supabase
         .from("profiles")
-        .select("role")
+        .select("full_name, role")
         .eq("id", user.id)
         .single();
 
       setRole((profile?.role as AppRole) ?? "VIEWER");
+      setFullName(profile?.full_name ?? user.email ?? null);
     }
 
-    loadUserRole();
+    loadUserProfile();
   }, [pathname]);
+
+  async function handleLogout() {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signOut();
+
+    setMobileOpen(false);
+    setRole(null);
+    setFullName(null);
+    setUserEmail(null);
+    router.push("/login");
+    router.refresh();
+  }
 
   if (pathname === "/login") {
     return <>{children}</>;
@@ -247,7 +332,13 @@ export function AppShell({ children }: AppShellProps) {
     <div className="jr-page lg:grid lg:grid-cols-[224px_1fr]">
       <aside className="hidden min-h-screen lg:block">
         <div className="fixed inset-y-0 left-0 w-[224px]">
-          <SidebarContent pathname={pathname} role={role} />
+          <SidebarContent
+            pathname={pathname}
+            role={role}
+            fullName={fullName}
+            userEmail={userEmail}
+            onLogout={handleLogout}
+          />
         </div>
       </aside>
 
@@ -280,6 +371,9 @@ export function AppShell({ children }: AppShellProps) {
               <SidebarContent
                 pathname={pathname}
                 role={role}
+                fullName={fullName}
+                userEmail={userEmail}
+                onLogout={handleLogout}
                 onNavigate={() => setMobileOpen(false)}
               />
             </div>

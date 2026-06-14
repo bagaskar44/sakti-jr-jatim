@@ -1,23 +1,18 @@
 create extension if not exists pgcrypto;
 
-do $$
-begin
-  create type public.master_unit_type as enum (
-    'KANWIL',
-    'CABANG',
-    'KANTOR_PELAYANAN',
-    'SAMSAT',
-    'LOKET',
-    'OPERATOR',
-    'DISHUB',
-    'DLLAJ',
-    'LAINNYA'
-  );
-exception
-  when duplicate_object then null;
-end $$;
+create type public.master_unit_type as enum (
+  'KANWIL',
+  'CABANG',
+  'KANTOR_PELAYANAN',
+  'SAMSAT',
+  'LOKET',
+  'OPERATOR',
+  'DISHUB',
+  'DLLAJ',
+  'LAINNYA'
+);
 
-create table if not exists public.master_units (
+create table public.master_units (
   id uuid primary key default gen_random_uuid(),
   unit_name text not null,
   canonical_name text not null unique,
@@ -39,7 +34,7 @@ create table if not exists public.master_units (
   )
 );
 
-create table if not exists public.master_unit_aliases (
+create table public.master_unit_aliases (
   id uuid primary key default gen_random_uuid(),
   unit_id uuid not null references public.master_units(id) on delete cascade,
   alias_name text not null,
@@ -47,19 +42,19 @@ create table if not exists public.master_unit_aliases (
   created_at timestamptz not null default now()
 );
 
-create index if not exists master_units_parent_unit_id_idx
+create index master_units_parent_unit_id_idx
   on public.master_units(parent_unit_id);
 
-create index if not exists master_units_unit_type_idx
+create index master_units_unit_type_idx
   on public.master_units(unit_type);
 
-create index if not exists master_units_is_active_idx
+create index master_units_is_active_idx
   on public.master_units(is_active);
 
-create index if not exists master_unit_aliases_unit_id_idx
+create index master_unit_aliases_unit_id_idx
   on public.master_unit_aliases(unit_id);
 
-create or replace function public.set_master_units_updated_at()
+create function public.set_master_units_updated_at()
 returns trigger
 language plpgsql
 as $$
@@ -68,8 +63,6 @@ begin
   return new;
 end;
 $$;
-
-drop trigger if exists trg_master_units_updated_at on public.master_units;
 
 create trigger trg_master_units_updated_at
 before update on public.master_units

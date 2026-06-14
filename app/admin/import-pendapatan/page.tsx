@@ -29,22 +29,22 @@ type ValidationIssue = {
 
 type RevenueTotals = {
   swdkllj_total?: number;
-  swdkllj_detail_total?: number;
   swdkllj_transaction_count?: number;
-  swdkllj_detail_transaction_count?: number;
   iwkbu_current_year?: number;
   iwkbu_last_year?: number;
   iwkl_nominal?: number;
   iwkl_passenger_count?: number;
+  iwkl_cabang_nominal?: number;
+  iwkl_cabang_passenger_count?: number;
+  iwkl_jenis_nominal?: number;
+  iwkl_jenis_passenger_count?: number;
 };
 
 type RevenueRowCounts = {
   swdkllj?: number;
-  swdkllj_detail?: number;
   iwkbu?: number;
-  iwkbu_detail?: number;
-  iwkl?: number;
-  iwkl_detail?: number;
+  iwkl_cabang?: number;
+  iwkl_jenis?: number;
 };
 
 type ValidateResponse = {
@@ -153,11 +153,9 @@ function getLogTotalRows(log: SyncLogRow) {
 
   return (
     Number(rowCounts.swdkllj ?? 0) +
-    Number(rowCounts.swdkllj_detail ?? 0) +
     Number(rowCounts.iwkbu ?? 0) +
-    Number(rowCounts.iwkbu_detail ?? 0) +
-    Number(rowCounts.iwkl ?? 0) +
-    Number(rowCounts.iwkl_detail ?? 0)
+    Number(rowCounts.iwkl_cabang ?? 0) +
+    Number(rowCounts.iwkl_jenis ?? 0)
   );
 }
 
@@ -533,25 +531,17 @@ function SyncLogDetailPanel({ log }: { log: SyncLogRow | null }) {
             <span className="text-right font-bold text-slate-900">
               {formatNumber(log.row_counts?.swdkllj ?? 0)}
             </span>
-            <span className="text-slate-500">SWDKLLJ Detail</span>
-            <span className="text-right font-bold text-slate-900">
-              {formatNumber(log.row_counts?.swdkllj_detail ?? 0)}
-            </span>
             <span className="text-slate-500">IWKBU</span>
             <span className="text-right font-bold text-slate-900">
               {formatNumber(log.row_counts?.iwkbu ?? 0)}
             </span>
-            <span className="text-slate-500">IWKBU Detail</span>
+            <span className="text-slate-500">IWKL Cabang</span>
             <span className="text-right font-bold text-slate-900">
-              {formatNumber(log.row_counts?.iwkbu_detail ?? 0)}
+              {formatNumber(log.row_counts?.iwkl_cabang ?? 0)}
             </span>
-            <span className="text-slate-500">IWKL</span>
+            <span className="text-slate-500">IWKL Jenis</span>
             <span className="text-right font-bold text-slate-900">
-              {formatNumber(log.row_counts?.iwkl ?? 0)}
-            </span>
-            <span className="text-slate-500">IWKL Detail</span>
-            <span className="text-right font-bold text-slate-900">
-              {formatNumber(log.row_counts?.iwkl_detail ?? 0)}
+              {formatNumber(log.row_counts?.iwkl_jenis ?? 0)}
             </span>
           </div>
         </div>
@@ -958,21 +948,16 @@ export default function ImportPendapatanPage() {
                 {validateResult.message}
               </div>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <MetricBox label="SWDKLLJ" value={rowCounts?.swdkllj} />
-                <MetricBox
-                  label="SWDKLLJ Detail"
-                  value={rowCounts?.swdkllj_detail}
-                />
                 <MetricBox label="IWKBU" value={rowCounts?.iwkbu} />
                 <MetricBox
-                  label="IWKBU Detail"
-                  value={rowCounts?.iwkbu_detail}
+                  label="IWKL Cabang"
+                  value={rowCounts?.iwkl_cabang}
                 />
-                <MetricBox label="IWKL" value={rowCounts?.iwkl} />
                 <MetricBox
-                  label="IWKL Detail"
-                  value={rowCounts?.iwkl_detail}
+                  label="IWKL Jenis"
+                  value={rowCounts?.iwkl_jenis}
                 />
               </div>
 

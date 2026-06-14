@@ -134,10 +134,7 @@ export async function POST(request: Request) {
 
     const batchId = batch.id as string;
 
-    const swdklljRows = [
-      ...data.swdkllj,
-      ...data.swdklljDetail,
-    ].map((row) => ({
+    const swdklljRows = data.swdkllj.map((row) => ({
       batch_id: batchId,
       unit_name: row.unit_name,
       parent_unit_name: row.parent_unit_name,
@@ -150,10 +147,7 @@ export async function POST(request: Request) {
       transaction_count: row.transaction_count,
     }));
 
-    const iwkbuRows = [
-      ...data.iwkbu,
-      ...data.iwkbuDetail,
-    ].map((row) => ({
+    const iwkbuRows = data.iwkbu.map((row) => ({
       batch_id: batchId,
       unit_name: row.unit_name,
       parent_unit_name: row.parent_unit_name,
@@ -166,16 +160,15 @@ export async function POST(request: Request) {
       iwkbu_activity_pct: row.iwkbu_activity_pct,
     }));
 
-    const iwklRows = data.iwkl.map((row) => ({
+    const iwklCabangRows = data.iwklCabang.map((row) => ({
       batch_id: batchId,
       unit_name: row.unit_name,
       passenger_count: row.passenger_count,
       nominal: row.nominal,
     }));
 
-    const iwklDetailRows = data.iwklDetail.map((row) => ({
+    const iwklJenisRows = data.iwklJenis.map((row) => ({
       batch_id: batchId,
-      parent_unit_name: row.parent_unit_name,
       detail_type: row.detail_type,
       passenger_count: row.passenger_count,
       nominal: row.nominal,
@@ -197,22 +190,20 @@ export async function POST(request: Request) {
       throw new Error(`Gagal insert IWKBU: ${iwkbuError.message}`);
     }
 
-    const { error: iwklError } = await supabase
-      .from("revenue_iwkl")
-      .insert(iwklRows);
+    const { error: iwklCabangError } = await supabase
+      .from("revenue_iwkl_cabang")
+      .insert(iwklCabangRows);
 
-    if (iwklError) {
-      throw new Error(`Gagal insert IWKL: ${iwklError.message}`);
+    if (iwklCabangError) {
+      throw new Error(`Gagal insert IWKL Cabang: ${iwklCabangError.message}`);
     }
 
-    const { error: iwklDetailError } = await supabase
-      .from("revenue_iwkl_details")
-      .insert(iwklDetailRows);
+    const { error: iwklJenisError } = await supabase
+      .from("revenue_iwkl_jenis")
+      .insert(iwklJenisRows);
 
-    if (iwklDetailError) {
-      throw new Error(
-        `Gagal insert IWKL detail: ${iwklDetailError.message}`
-      );
+    if (iwklJenisError) {
+      throw new Error(`Gagal insert IWKL Jenis: ${iwklJenisError.message}`);
     }
 
     await supabase.from("revenue_sync_logs").insert({

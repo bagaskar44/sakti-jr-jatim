@@ -3,15 +3,15 @@ export function formatRupiah(value: number | string | null | undefined) {
 
   if (numberValue >= 1_000_000_000) {
     return `Rp ${(numberValue / 1_000_000_000).toLocaleString("id-ID", {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     })} M`;
   }
 
   if (numberValue >= 1_000_000) {
     return `Rp ${(numberValue / 1_000_000).toLocaleString("id-ID", {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     })} Jt`;
   }
 

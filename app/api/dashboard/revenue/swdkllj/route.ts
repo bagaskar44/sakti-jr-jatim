@@ -34,7 +34,7 @@ export async function GET(request: Request) {
     } else if (level && level.trim()) {
       query = query.eq("level", level.trim());
     } else {
-      query = query.in("level", ["KANWIL_DIRECT", "CABANG_SUMMARY"]);
+      query = query.eq("level", "PARENT_SUMMARY");
     }
 
     const { data, error } = await query.order("total", { ascending: false });

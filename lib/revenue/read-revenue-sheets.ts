@@ -1,11 +1,9 @@
 import { google } from "googleapis";
 import {
-  parseIwkl,
-  parseIwklDetail,
+  parseIwklCabang,
+  parseIwklJenis,
   parseIwkbu,
-  parseIwkbuDetail,
   parseSwdkllj,
-  parseSwdklljDetail,
   sumBy,
   validateHeader,
 } from "@/lib/revenue/parser";
@@ -24,41 +22,26 @@ export type ValidationIssue = {
 
 type SheetName =
   | "SWDKLLJ"
-  | "SWDKLLJ_Detail"
   | "IWKBU"
-  | "IWKBU_Detail"
-  | "IWKL"
-  | "IWKL_Detail";
+  | "IWKL_Cabang"
+  | "IWKL_Jenis";
 
 const SHEET_NAMES: SheetName[] = [
   "SWDKLLJ",
-  "SWDKLLJ_Detail",
   "IWKBU",
-  "IWKBU_Detail",
-  "IWKL",
-  "IWKL_Detail",
+  "IWKL_Cabang",
+  "IWKL_Jenis",
 ];
 
 const SHEET_RANGES: Record<SheetName, string> = {
-  SWDKLLJ: "SWDKLLJ!A:G",
-  SWDKLLJ_Detail: "SWDKLLJ_Detail!A:H",
-  IWKBU: "IWKBU!A:G",
-  IWKBU_Detail: "IWKBU_Detail!A:H",
-  IWKL: "IWKL!A:C",
-  IWKL_Detail: "IWKL_Detail!A:D",
+  SWDKLLJ: "SWDKLLJ!A:H",
+  IWKBU: "IWKBU!A:H",
+  IWKL_Cabang: "IWKL_Cabang!A:C",
+  IWKL_Jenis: "IWKL_Jenis!A:C",
 };
 
 const EXPECTED_HEADERS: Record<SheetName, string[]> = {
   SWDKLLJ: [
-    "Kantor",
-    "KD",
-    "SW",
-    "DENDA",
-    "(+/-) SETOR",
-    "TOTAL",
-    "Jumlah Transaksi",
-  ],
-  SWDKLLJ_Detail: [
     "Kantor Cabang",
     "Kantor",
     "KD",
@@ -68,8 +51,7 @@ const EXPECTED_HEADERS: Record<SheetName, string[]> = {
     "TOTAL",
     "Jumlah Transaksi",
   ],
-  IWKBU: ["Kantor", "ASK", "IWKBU", "ASK", "IWKBU", "ASK", "IWKBU"],
-  IWKBU_Detail: [
+  IWKBU: [
     "Kantor Cabang",
     "Kantor",
     "ASK",
@@ -79,8 +61,8 @@ const EXPECTED_HEADERS: Record<SheetName, string[]> = {
     "ASK",
     "IWKBU",
   ],
-  IWKL: ["Kantor", "Penumpang", "Nominal"],
-  IWKL_Detail: ["Kantor Cabang", "Jenis", "Penumpang", "Nominal"],
+  IWKL_Cabang: ["Kantor", "Penumpang", "Nominal"],
+  IWKL_Jenis: ["Jenis", "Penumpang", "Nominal"],
 };
 
 export async function readRevenueSheets() {
@@ -137,38 +119,26 @@ export async function readRevenueSheets() {
     technicalErrors
   );
 
-  const swdklljDetail = parseSwdklljDetail(
-    sheetMap.get("SWDKLLJ_Detail") || [],
-    technicalErrors
-  );
-
   const iwkbu = parseIwkbu(
     sheetMap.get("IWKBU") || [],
     technicalErrors
   );
 
-  const iwkbuDetail = parseIwkbuDetail(
-    sheetMap.get("IWKBU_Detail") || [],
+  const iwklCabang = parseIwklCabang(
+    sheetMap.get("IWKL_Cabang") || [],
     technicalErrors
   );
 
-  const iwkl = parseIwkl(
-    sheetMap.get("IWKL") || [],
-    technicalErrors
-  );
-
-  const iwklDetail = parseIwklDetail(
-    sheetMap.get("IWKL_Detail") || [],
+  const iwklJenis = parseIwklJenis(
+    sheetMap.get("IWKL_Jenis") || [],
     technicalErrors
   );
 
   const revenueRows = {
     swdkllj,
-    swdklljDetail,
     iwkbu,
-    iwkbuDetail,
-    iwkl,
-    iwklDetail,
+    iwklCabang,
+    iwklJenis,
   };
 
   let masterUnitWarnings: ValidationIssue[] = [];
@@ -211,39 +181,43 @@ export async function readRevenueSheets() {
 
   const rowCounts = {
     swdkllj: swdkllj.length,
-    swdkllj_detail: swdklljDetail.length,
     iwkbu: iwkbu.length,
-    iwkbu_detail: iwkbuDetail.length,
-    iwkl: iwkl.length,
-    iwkl_detail: iwklDetail.length,
+    iwkl_cabang: iwklCabang.length,
+    iwkl_jenis: iwklJenis.length,
   };
 
   const totals = {
     swdkllj_total: sumBy(swdkllj, (row) => row.total),
-    swdkllj_detail_total: sumBy(swdklljDetail, (row) => row.total),
     swdkllj_transaction_count: sumBy(
       swdkllj,
       (row) => row.transaction_count
     ),
-    swdkllj_detail_transaction_count: sumBy(
-      swdklljDetail,
-      (row) => row.transaction_count
-    ),
     iwkbu_current_year: sumBy(iwkbu, (row) => row.iwkbu_current_year),
     iwkbu_last_year: sumBy(iwkbu, (row) => row.iwkbu_last_year),
-    iwkl_nominal: sumBy(iwkl, (row) => row.nominal),
-    iwkl_passenger_count: sumBy(iwkl, (row) => row.passenger_count),
+    iwkl_nominal: sumBy(iwklCabang, (row) => row.nominal),
+    iwkl_passenger_count: sumBy(
+      iwklCabang,
+      (row) => row.passenger_count
+    ),
+    iwkl_cabang_nominal: sumBy(iwklCabang, (row) => row.nominal),
+    iwkl_cabang_passenger_count: sumBy(
+      iwklCabang,
+      (row) => row.passenger_count
+    ),
+    iwkl_jenis_nominal: sumBy(iwklJenis, (row) => row.nominal),
+    iwkl_jenis_passenger_count: sumBy(
+      iwklJenis,
+      (row) => row.passenger_count
+    ),
   };
 
   return {
     spreadsheetId,
     data: {
       swdkllj,
-      swdklljDetail,
       iwkbu,
-      iwkbuDetail,
-      iwkl,
-      iwklDetail,
+      iwklCabang,
+      iwklJenis,
     },
     errors,
     warnings,

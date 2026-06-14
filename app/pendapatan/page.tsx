@@ -329,7 +329,7 @@ function buildDashboardUnits({
   const byUnit = new Map<string, UnitRow>();
 
   for (const row of swdklljRows) {
-    if (!["KANWIL_DIRECT", "CABANG_SUMMARY"].includes(row.level)) continue;
+    if (row.level !== "PARENT_SUMMARY") continue;
 
     const unit = getOrCreateUnit(byUnit, row.unit_name);
 
@@ -341,7 +341,7 @@ function buildDashboardUnits({
   }
 
   for (const row of iwkbuRows) {
-    if (row.level !== "SUMMARY") continue;
+    if (row.level !== "PARENT_SUMMARY") continue;
 
     const unit = getOrCreateUnit(byUnit, row.unit_name);
 
@@ -741,7 +741,7 @@ function formatDisplayUnitName(value: string) {
 function findSwdklljSummaryRow(rows: SwdklljRow[], unitName: string) {
   return rows.find(
     (row) =>
-      ["KANWIL_DIRECT", "CABANG_SUMMARY"].includes(row.level) &&
+      row.level === "PARENT_SUMMARY" &&
       normalizeDashboardUnitName(row.unit_name) === unitName
   );
 }
@@ -749,7 +749,7 @@ function findSwdklljSummaryRow(rows: SwdklljRow[], unitName: string) {
 function findIwkbuSummaryRow(rows: IwkbuRow[], unitName: string) {
   return rows.find(
     (row) =>
-      row.level === "SUMMARY" &&
+      row.level === "PARENT_SUMMARY" &&
       normalizeDashboardUnitName(row.unit_name) === unitName
   );
 }
@@ -856,32 +856,21 @@ function buildIwkbuMetrics({
 }
 
 function buildIwklMetrics({
-  detailRows,
   unit,
   totalIwklJatim,
 }: {
-  detailRows: IwklDetailRow[];
   unit: UnitRow;
   totalIwklJatim: number;
 }): IwklMetrics {
-  const total =
-    detailRows.reduce((sum, row) => sum + toNumber(row.nominal), 0) ||
-    toNumber(unit.iwkl_total);
-  const passengerCount =
-    detailRows.reduce((sum, row) => sum + toNumber(row.passenger_count), 0) ||
-    toNumber(unit.iwkl_passenger_count);
-  const topOperator = [...detailRows]
-    .filter((row) => toNumber(row.nominal) > 0 || toNumber(row.passenger_count) > 0)
-    .sort((a, b) => toNumber(b.nominal) - toNumber(a.nominal))[0];
+  const total = toNumber(unit.iwkl_total);
+  const passengerCount = toNumber(unit.iwkl_passenger_count);
 
   return {
     total,
     passenger_count: passengerCount,
-    top_operator_name: topOperator?.detail_type ?? "-",
+    top_operator_name: unit.unit_name,
     unit_contribution_pct: totalIwklJatim > 0 ? (total / totalIwklJatim) * 100 : 0,
-    active_types: detailRows.filter(
-      (row) => toNumber(row.nominal) > 0 || toNumber(row.passenger_count) > 0
-    ).length,
+    active_types: total > 0 || passengerCount > 0 ? 1 : 0,
     status: total > 0 || passengerCount > 0 ? "Data tersedia" : "Tidak ada data",
   };
 }
@@ -1134,6 +1123,7 @@ function IwkbuKpiGrid({
 
 function IwklKpiGrid({
   metrics,
+  scope = "all",
 }: {
   metrics: IwklMetrics;
   scope?: "all" | "unit";
@@ -1153,15 +1143,17 @@ function IwklKpiGrid({
         icon={<Users size={17.6} />}
       />
       <KpiCard
-        title="Operator Utama"
+        title={scope === "unit" ? "Unit/Kantor" : "Operator Utama"}
         value={metrics.top_operator_name}
-        subtitle="Operator utama"
+        subtitle={scope === "unit" ? "Cabang/kanwil terpilih" : "Operator utama"}
         icon={<Ship size={17.6} />}
       />
       <KpiCard
-        title="Jenis Aktif"
-        value={formatNumber(metrics.active_types)}
-        subtitle="Jenis berkontribusi"
+        title={scope === "unit" ? "Status" : "Jenis Aktif"}
+        value={
+          scope === "unit" ? metrics.status : formatNumber(metrics.active_types)
+        }
+        subtitle={scope === "unit" ? "Status data cabang" : "Jenis berkontribusi"}
         icon={<ReceiptText size={17.6} />}
       />
     </section>
@@ -2197,74 +2189,6 @@ function IwkbuTable({
   );
 }
 
-function IwklDetailTable({
-  rows,
-  total,
-}: {
-  rows: IwklDetailRow[];
-  total: number;
-}) {
-  if (rows.length === 0) {
-    return <EmptyState message="Tidak ada data IWKL pada periode ini." />;
-  }
-
-  return (
-    <div className="jr-table-shell">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[688px] text-left text-sm">
-          <thead className="jr-table-head">
-            <tr>
-              <th className="px-4 py-3">Jenis / Operator</th>
-              <th className="px-4 py-3">Penumpang</th>
-              <th className="px-4 py-3">Nominal</th>
-              <th className="px-4 py-3">Kontribusi</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Aksi</th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-slate-100 bg-white">
-            {rows.map((row) => {
-              const amount = toNumber(row.nominal);
-              const contribution = total > 0 ? (amount / total) * 100 : 0;
-              const status =
-                amount > 0 || toNumber(row.passenger_count) > 0
-                  ? "Aktif"
-                  : "Tidak aktif";
-
-              return (
-                <tr
-                  key={`${row.parent_unit_name}-${row.detail_type}`}
-                  className="hover:bg-[#f8fafc]"
-                >
-                  <td className="px-4 py-3 font-semibold text-slate-900">
-                    {row.detail_type}
-                  </td>
-                  <td className="px-4 py-3">
-                    {formatNumber(row.passenger_count)}
-                  </td>
-                  <td className="px-4 py-3 font-bold text-slate-900">
-                    {formatRupiah(row.nominal)}
-                  </td>
-                  <td className="px-4 py-3 font-semibold text-slate-700">
-                    {formatPercent(contribution)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusBadge status={status} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <DetailLinkButton onClick={() => undefined} />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
 function IwklOverviewTable({
   rows,
   total,
@@ -2272,7 +2196,7 @@ function IwklOverviewTable({
 }: {
   rows: IwklRow[];
   total: number;
-  onOpenDetail: (unitName: string) => void;
+  onOpenDetail?: (unitName: string) => void;
 }) {
   const sortedRows = [...rows].sort(
     (a, b) => toNumber(b.nominal) - toNumber(a.nominal)
@@ -2293,7 +2217,7 @@ function IwklOverviewTable({
               <th className="px-4 py-3">Nominal</th>
               <th className="px-4 py-3">Kontribusi</th>
               <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Aksi</th>
+              {onOpenDetail && <th className="px-4 py-3">Aksi</th>}
             </tr>
           </thead>
 
@@ -2322,11 +2246,13 @@ function IwklOverviewTable({
                   <td className="px-4 py-3">
                     <StatusBadge status={status} />
                   </td>
-                  <td className="px-4 py-3">
-                    <DetailLinkButton
-                      onClick={() => onOpenDetail(row.unit_name)}
-                    />
-                  </td>
+                  {onOpenDetail && (
+                    <td className="px-4 py-3">
+                      <DetailLinkButton
+                        onClick={() => onOpenDetail(row.unit_name)}
+                      />
+                    </td>
+                  )}
                 </tr>
               );
             })}
@@ -2365,8 +2291,6 @@ export default function PendapatanPage() {
   const [iwklAllDetailRows, setIwklAllDetailRows] = useState<IwklDetailRow[]>(
     []
   );
-  const [iwklDetailRows, setIwklDetailRows] = useState<IwklDetailRow[]>([]);
-  const [selectedIwklParent, setSelectedIwklParent] = useState("");
 
   const [previewSwdklljRows, setPreviewSwdklljRows] = useState<SwdklljRow[]>(
     []
@@ -2476,8 +2400,6 @@ export default function PendapatanPage() {
       setSelectedSwdklljParent("");
       setIwkbuDetailRows([]);
       setSelectedIwkbuParent("");
-      setIwklDetailRows([]);
-      setSelectedIwklParent("");
       setPreviewSwdklljRows([]);
       setPreviewIwkbuRows([]);
       setPreviewIwklRows([]);
@@ -2648,10 +2570,14 @@ export default function PendapatanPage() {
     [iwkbuDetailRows, previewIwkbuRows]
   );
 
-  const activeIwklRows = useMemo(
-    () => (iwklDetailRows.length > 0 ? iwklDetailRows : previewIwklRows),
-    [iwklDetailRows, previewIwklRows]
-  );
+  const selectedIwklCabangRows = useMemo(() => {
+    if (!selectedUnit) return [];
+
+    return iwklSummaryRows.filter(
+      (row) =>
+        normalizeDashboardUnitName(row.unit_name) === selectedUnit.unit_name
+    );
+  }, [iwklSummaryRows, selectedUnit]);
 
   const selectedSwdklljSummaryRow = useMemo(() => {
     if (!selectedUnit) return undefined;
@@ -2689,11 +2615,10 @@ export default function PendapatanPage() {
     if (!selectedUnit || !dashboardMetrics) return null;
 
     return buildIwklMetrics({
-      detailRows: activeIwklRows,
       unit: selectedUnit,
       totalIwklJatim: dashboardMetrics.iwkl_total,
     });
-  }, [activeIwklRows, dashboardMetrics, selectedUnit]);
+  }, [dashboardMetrics, selectedUnit]);
 
   const activeSwdklljMetrics = selectedUnit
     ? swdklljSourceMetrics
@@ -2775,33 +2700,6 @@ export default function PendapatanPage() {
         setIwkbuDetailRows(json.data ?? []);
       } catch {
         setIwkbuDetailRows([]);
-      } finally {
-        setDetailLoading(false);
-      }
-    },
-    [appliedMonth, appliedYear]
-  );
-
-  const openIwklDetail = useCallback(
-    async (parent: string) => {
-      setDetailLoading(true);
-      setSelectedIwklParent(parent);
-
-      try {
-        const response = await fetch(
-          `/api/dashboard/revenue/iwkl?year=${appliedYear}&month=${appliedMonth}&parent=${encodeURIComponent(
-            parent
-          )}`
-        );
-
-        const json = await readApiJson<IwklResponse>(
-          response,
-          "Gagal mengambil detail IWKL."
-        );
-
-        setIwklDetailRows(json.details ?? []);
-      } catch {
-        setIwklDetailRows([]);
       } finally {
         setDetailLoading(false);
       }
@@ -2900,12 +2798,6 @@ export default function PendapatanPage() {
         openIwkbuDetail(selectedUnit.unit_name);
       }
 
-      if (
-        activeTab === "IWKL" &&
-        selectedIwklParent !== selectedUnit.unit_name
-      ) {
-        openIwklDetail(selectedUnit.unit_name);
-      }
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
@@ -2913,10 +2805,8 @@ export default function PendapatanPage() {
     activeTab,
     loading,
     openIwkbuDetail,
-    openIwklDetail,
     openSwdklljDetail,
     selectedIwkbuParent,
-    selectedIwklParent,
     selectedSwdklljParent,
     selectedUnit,
   ]);
@@ -2966,8 +2856,6 @@ export default function PendapatanPage() {
     setSelectedSwdklljParent("");
     setIwkbuDetailRows([]);
     setSelectedIwkbuParent("");
-    setIwklDetailRows([]);
-    setSelectedIwklParent("");
     setPreviewSwdklljRows([]);
     setPreviewIwkbuRows([]);
     setPreviewIwklRows([]);
@@ -3032,8 +2920,6 @@ export default function PendapatanPage() {
       openSwdklljDetail(selectedUnit.unit_name);
     } else if (tab === "IWKBU") {
       openIwkbuDetail(selectedUnit.unit_name);
-    } else {
-      openIwklDetail(selectedUnit.unit_name);
     }
   }
 
@@ -3054,8 +2940,6 @@ export default function PendapatanPage() {
       openSwdklljDetail(selectedUnit.unit_name);
     } else if (sourceKey === "IWKBU") {
       openIwkbuDetail(selectedUnit.unit_name);
-    } else {
-      openIwklDetail(selectedUnit.unit_name);
     }
   }
 
@@ -3078,8 +2962,6 @@ export default function PendapatanPage() {
       openSwdklljDetail(normalizedUnit);
     } else if (sourceKey === "IWKBU") {
       openIwkbuDetail(normalizedUnit);
-    } else {
-      openIwklDetail(normalizedUnit);
     }
   }
 
@@ -3367,33 +3249,17 @@ export default function PendapatanPage() {
 
             {selectedUnit && activeTab === "IWKL" && iwklSourceMetrics && (
               <>
-                <section className="grid grid-cols-1 gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-                  <SectionCard title="Komposisi IWKL" className="flex flex-col">
-                    <IwklCompositionPanel
-                      rows={activeIwklRows}
-                      metrics={iwklSourceMetrics}
-                    />
-                  </SectionCard>
-
-                  <SectionCard title="Ringkasan Operator / Jenis">
-                    <IwklOperatorSummaryPanel
-                      rows={activeIwklRows}
-                      metrics={iwklSourceMetrics}
-                    />
-                  </SectionCard>
-                </section>
-
                 <SectionCard
-                  title={`Detail IWKL ${formatDisplayUnitName(
+                  title={`Ringkasan IWKL ${formatDisplayUnitName(
                     selectedUnit.unit_name
                   )}`}
                 >
                   {detailLoading || previewLoading ? (
-                    <EmptyState message="Memuat detail IWKL..." />
+                    <EmptyState message="Memuat ringkasan IWKL..." />
                   ) : (
-                    <IwklDetailTable
-                      rows={activeIwklRows}
-                      total={iwklSourceMetrics.total}
+                    <IwklOverviewTable
+                      rows={selectedIwklCabangRows}
+                      total={dashboardMetrics.iwkl_total}
                     />
                   )}
                 </SectionCard>

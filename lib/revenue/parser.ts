@@ -16,8 +16,8 @@ export function normalizeText(value: unknown): string {
 const UNIT_ALIASES: Record<string, string> = {
   "KANTOR PELAYANAN MOJEKERTO": "KANTOR PELAYANAN MOJOKERTO",
   "KANTOR CABANG MOJOKERTO": "KANTOR PELAYANAN MOJOKERTO",
-  "MOJOKERTO": "KANTOR PELAYANAN MOJOKERTO",
-  "MOJEKERTO": "KANTOR PELAYANAN MOJOKERTO",
+  MOJOKERTO: "KANTOR PELAYANAN MOJOKERTO",
+  MOJEKERTO: "KANTOR PELAYANAN MOJOKERTO",
 };
 
 export function normalizeUnitName(value: unknown): string {
@@ -162,10 +162,7 @@ export function parsePercent(
 
   const raw = String(value).trim();
 
-  const cleaned = raw
-    .replace("%", "")
-    .replace(/\s/g, "")
-    .replace(",", ".");
+  const cleaned = raw.replace("%", "").replace(/\s/g, "").replace(",", ".");
 
   const result = Number(cleaned);
 
@@ -212,68 +209,12 @@ export function parseSwdkllj(rows: string[][], errors: ValidationError[]) {
 
   return dataRows.map((row, index) => {
     const rowNumber = index + 2;
-    const unitName = normalizeUnitName(row[0]);
-
-    if (!unitName) {
-      errors.push({
-        sheet: "SWDKLLJ",
-        row: rowNumber,
-        column: "Kantor",
-        message: "Kantor tidak boleh kosong.",
-      });
-    }
-
-    return {
-      unit_name: unitName,
-      parent_unit_name: null,
-      level: unitName.startsWith("KANTOR CABANG")
-        ? "CABANG_SUMMARY"
-        : "KANWIL_DIRECT",
-      kd: parseRupiah(row[1], errors, {
-        sheet: "SWDKLLJ",
-        row: rowNumber,
-        column: "KD",
-      }),
-      sw: parseRupiah(row[2], errors, {
-        sheet: "SWDKLLJ",
-        row: rowNumber,
-        column: "SW",
-      }),
-      denda: parseRupiah(row[3], errors, {
-        sheet: "SWDKLLJ",
-        row: rowNumber,
-        column: "DENDA",
-      }),
-      setor_adjustment: parseRupiah(row[4], errors, {
-        sheet: "SWDKLLJ",
-        row: rowNumber,
-        column: "(+/-) SETOR",
-      }),
-      total: parseRupiah(row[5], errors, {
-        sheet: "SWDKLLJ",
-        row: rowNumber,
-        column: "TOTAL",
-      }),
-      transaction_count: parseIndonesianCount(row[6], errors, {
-        sheet: "SWDKLLJ",
-        row: rowNumber,
-        column: "Jumlah Transaksi",
-      }),
-    };
-  });
-}
-
-export function parseSwdklljDetail(rows: string[][], errors: ValidationError[]) {
-  const dataRows = rows.slice(1).filter((row) => !isBlankRow(row));
-
-  return dataRows.map((row, index) => {
-    const rowNumber = index + 2;
     const parentUnitName = normalizeParentUnit(row[0]);
     const unitName = normalizeUnitName(row[1]);
 
     if (!parentUnitName) {
       errors.push({
-        sheet: "SWDKLLJ_Detail",
+        sheet: "SWDKLLJ",
         row: rowNumber,
         column: "Kantor Cabang",
         message: "Kantor Cabang tidak boleh kosong.",
@@ -282,7 +223,7 @@ export function parseSwdklljDetail(rows: string[][], errors: ValidationError[]) 
 
     if (!unitName) {
       errors.push({
-        sheet: "SWDKLLJ_Detail",
+        sheet: "SWDKLLJ",
         row: rowNumber,
         column: "Kantor",
         message: "Kantor tidak boleh kosong.",
@@ -292,34 +233,34 @@ export function parseSwdklljDetail(rows: string[][], errors: ValidationError[]) 
     return {
       unit_name: unitName,
       parent_unit_name: parentUnitName,
-      level: "SAMSAT_DETAIL",
+      level: "DETAIL",
       kd: parseRupiah(row[2], errors, {
-        sheet: "SWDKLLJ_Detail",
+        sheet: "SWDKLLJ",
         row: rowNumber,
         column: "KD",
       }),
       sw: parseRupiah(row[3], errors, {
-        sheet: "SWDKLLJ_Detail",
+        sheet: "SWDKLLJ",
         row: rowNumber,
         column: "SW",
       }),
       denda: parseRupiah(row[4], errors, {
-        sheet: "SWDKLLJ_Detail",
+        sheet: "SWDKLLJ",
         row: rowNumber,
         column: "DENDA",
       }),
       setor_adjustment: parseRupiah(row[5], errors, {
-        sheet: "SWDKLLJ_Detail",
+        sheet: "SWDKLLJ",
         row: rowNumber,
         column: "(+/-) SETOR",
       }),
       total: parseRupiah(row[6], errors, {
-        sheet: "SWDKLLJ_Detail",
+        sheet: "SWDKLLJ",
         row: rowNumber,
         column: "TOTAL",
       }),
       transaction_count: parseIndonesianCount(row[7], errors, {
-        sheet: "SWDKLLJ_Detail",
+        sheet: "SWDKLLJ",
         row: rowNumber,
         column: "Jumlah Transaksi",
       }),
@@ -332,66 +273,12 @@ export function parseIwkbu(rows: string[][], errors: ValidationError[]) {
 
   return dataRows.map((row, index) => {
     const rowNumber = index + 2;
-    const unitName = normalizeUnitName(row[0]);
-
-    if (!unitName) {
-      errors.push({
-        sheet: "IWKBU",
-        row: rowNumber,
-        column: "Kantor",
-        message: "Kantor tidak boleh kosong.",
-      });
-    }
-
-    return {
-      unit_name: unitName,
-      parent_unit_name: null,
-      level: "SUMMARY",
-      ask_last_year: parseRupiah(row[1], errors, {
-        sheet: "IWKBU",
-        row: rowNumber,
-        column: "ASK Tahun Lalu",
-      }),
-      iwkbu_last_year: parseRupiah(row[2], errors, {
-        sheet: "IWKBU",
-        row: rowNumber,
-        column: "IWKBU Tahun Lalu",
-      }),
-      ask_current_year: parseRupiah(row[3], errors, {
-        sheet: "IWKBU",
-        row: rowNumber,
-        column: "ASK Tahun Sekarang",
-      }),
-      iwkbu_current_year: parseRupiah(row[4], errors, {
-        sheet: "IWKBU",
-        row: rowNumber,
-        column: "IWKBU Tahun Sekarang",
-      }),
-      ask_activity_pct: parsePercent(row[5], errors, {
-        sheet: "IWKBU",
-        row: rowNumber,
-        column: "ASK Aktivitas %",
-      }),
-      iwkbu_activity_pct: parsePercent(row[6], errors, {
-        sheet: "IWKBU",
-        row: rowNumber,
-        column: "IWKBU Aktivitas %",
-      }),
-    };
-  });
-}
-
-export function parseIwkbuDetail(rows: string[][], errors: ValidationError[]) {
-  const dataRows = rows.slice(1).filter((row) => !isBlankRow(row));
-
-  return dataRows.map((row, index) => {
-    const rowNumber = index + 2;
     const parentUnitName = normalizeParentUnit(row[0]);
     const unitName = normalizeUnitName(row[1]);
 
     if (!parentUnitName) {
       errors.push({
-        sheet: "IWKBU_Detail",
+        sheet: "IWKBU",
         row: rowNumber,
         column: "Kantor Cabang",
         message: "Kantor Cabang tidak boleh kosong.",
@@ -400,7 +287,7 @@ export function parseIwkbuDetail(rows: string[][], errors: ValidationError[]) {
 
     if (!unitName) {
       errors.push({
-        sheet: "IWKBU_Detail",
+        sheet: "IWKBU",
         row: rowNumber,
         column: "Kantor",
         message: "Kantor tidak boleh kosong.",
@@ -412,32 +299,32 @@ export function parseIwkbuDetail(rows: string[][], errors: ValidationError[]) {
       parent_unit_name: parentUnitName,
       level: "DETAIL",
       ask_last_year: parseRupiah(row[2], errors, {
-        sheet: "IWKBU_Detail",
+        sheet: "IWKBU",
         row: rowNumber,
         column: "ASK Tahun Lalu",
       }),
       iwkbu_last_year: parseRupiah(row[3], errors, {
-        sheet: "IWKBU_Detail",
+        sheet: "IWKBU",
         row: rowNumber,
         column: "IWKBU Tahun Lalu",
       }),
       ask_current_year: parseRupiah(row[4], errors, {
-        sheet: "IWKBU_Detail",
+        sheet: "IWKBU",
         row: rowNumber,
         column: "ASK Tahun Sekarang",
       }),
       iwkbu_current_year: parseRupiah(row[5], errors, {
-        sheet: "IWKBU_Detail",
+        sheet: "IWKBU",
         row: rowNumber,
         column: "IWKBU Tahun Sekarang",
       }),
       ask_activity_pct: parsePercent(row[6], errors, {
-        sheet: "IWKBU_Detail",
+        sheet: "IWKBU",
         row: rowNumber,
         column: "ASK Aktivitas %",
       }),
       iwkbu_activity_pct: parsePercent(row[7], errors, {
-        sheet: "IWKBU_Detail",
+        sheet: "IWKBU",
         row: rowNumber,
         column: "IWKBU Aktivitas %",
       }),
@@ -445,7 +332,7 @@ export function parseIwkbuDetail(rows: string[][], errors: ValidationError[]) {
   });
 }
 
-export function parseIwkl(rows: string[][], errors: ValidationError[]) {
+export function parseIwklCabang(rows: string[][], errors: ValidationError[]) {
   const dataRows = rows.slice(1).filter((row) => !isBlankRow(row));
 
   return dataRows.map((row, index) => {
@@ -454,7 +341,7 @@ export function parseIwkl(rows: string[][], errors: ValidationError[]) {
 
     if (!unitName) {
       errors.push({
-        sheet: "IWKL",
+        sheet: "IWKL_Cabang",
         row: rowNumber,
         column: "Kantor",
         message: "Kantor tidak boleh kosong.",
@@ -464,12 +351,12 @@ export function parseIwkl(rows: string[][], errors: ValidationError[]) {
     return {
       unit_name: unitName,
       passenger_count: parseIndonesianCount(row[1], errors, {
-        sheet: "IWKL",
+        sheet: "IWKL_Cabang",
         row: rowNumber,
         column: "Penumpang",
       }),
       nominal: parseRupiah(row[2], errors, {
-        sheet: "IWKL",
+        sheet: "IWKL_Cabang",
         row: rowNumber,
         column: "Nominal",
       }),
@@ -477,26 +364,16 @@ export function parseIwkl(rows: string[][], errors: ValidationError[]) {
   });
 }
 
-export function parseIwklDetail(rows: string[][], errors: ValidationError[]) {
+export function parseIwklJenis(rows: string[][], errors: ValidationError[]) {
   const dataRows = rows.slice(1).filter((row) => !isBlankRow(row));
 
   return dataRows.map((row, index) => {
     const rowNumber = index + 2;
-    const parentUnitName = normalizeParentUnit(row[0]);
-    const detailType = normalizeUnitName(row[1]);
-
-    if (!parentUnitName) {
-      errors.push({
-        sheet: "IWKL_Detail",
-        row: rowNumber,
-        column: "Kantor Cabang",
-        message: "Kantor Cabang tidak boleh kosong.",
-      });
-    }
+    const detailType = normalizeUnitName(row[0]);
 
     if (!detailType) {
       errors.push({
-        sheet: "IWKL_Detail",
+        sheet: "IWKL_Jenis",
         row: rowNumber,
         column: "Jenis",
         message: "Jenis tidak boleh kosong.",
@@ -504,15 +381,14 @@ export function parseIwklDetail(rows: string[][], errors: ValidationError[]) {
     }
 
     return {
-      parent_unit_name: parentUnitName,
       detail_type: detailType,
-      passenger_count: parseIndonesianCount(row[2], errors, {
-        sheet: "IWKL_Detail",
+      passenger_count: parseIndonesianCount(row[1], errors, {
+        sheet: "IWKL_Jenis",
         row: rowNumber,
         column: "Penumpang",
       }),
-      nominal: parseRupiah(row[3], errors, {
-        sheet: "IWKL_Detail",
+      nominal: parseRupiah(row[2], errors, {
+        sheet: "IWKL_Jenis",
         row: rowNumber,
         column: "Nominal",
       }),

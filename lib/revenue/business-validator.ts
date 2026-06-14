@@ -20,20 +20,6 @@ function formatNumber(value: number): string {
   return new Intl.NumberFormat("id-ID").format(value);
 }
 
-function addError(
-  issues: Issue[],
-  sheet: string,
-  message: string,
-  context?: Record<string, unknown>
-) {
-  issues.push({
-    sheet,
-    severity: "error",
-    message,
-    context,
-  });
-}
-
 function addWarning(
   issues: Issue[],
   sheet: string,
@@ -108,148 +94,47 @@ function checkZeroRows(
   }
 }
 
-function buildSummaryMap(
-  rows: RevenueRow[],
-  keySelector: (row: RevenueRow) => string
-) {
-  const map = new Map<string, RevenueRow>();
-
-  for (const row of rows) {
-    const key = keySelector(row);
-    if (!key) continue;
-
-    map.set(key, row);
-  }
-
-  return map;
+function sumRows(rows: RevenueRow[], field: string) {
+  return rows.reduce((sum, row) => sum + numberValue(row[field]), 0);
 }
 
-function groupDetailRows(
-  rows: RevenueRow[],
-  options: {
-    keySelector: (row: RevenueRow) => string;
-    fields: string[];
-  }
-) {
-  const map = new Map<string, Record<string, number>>();
-
-  for (const row of rows) {
-    const key = options.keySelector(row);
-    if (!key) continue;
-
-    const current = map.get(key) ?? {};
-
-    for (const field of options.fields) {
-      current[field] = numberValue(current[field]) + numberValue(row[field]);
-    }
-
-    map.set(key, current);
-  }
-
-  return map;
-}
-
-function compareSubtotalWithSummary(options: {
-  sheet: string;
-  summaryRows: RevenueRow[];
-  detailRows: RevenueRow[];
-  summaryKeySelector: (row: RevenueRow) => string;
-  detailKeySelector: (row: RevenueRow) => string;
-  fields: {
-    field: string;
-    label: string;
-    tolerance?: number;
-  }[];
-  errors: Issue[];
+function checkIwklCabangJenisTotal(options: {
+  iwklCabang: RevenueRow[];
+  iwklJenis: RevenueRow[];
   warnings: Issue[];
 }) {
-  const summaryMap = buildSummaryMap(
-    options.summaryRows,
-    options.summaryKeySelector
+  const cabangTotal = sumRows(options.iwklCabang, "nominal");
+  const jenisTotal = sumRows(options.iwklJenis, "nominal");
+  const difference = jenisTotal - cabangTotal;
+
+  if (Math.abs(difference) <= 1) return;
+
+  addWarning(
+    options.warnings,
+    "IWKL_Jenis",
+    "Total nominal IWKL Jenis berbeda dengan total nominal IWKL Cabang.",
+    {
+      iwkl_cabang_nominal: cabangTotal,
+      iwkl_jenis_nominal: jenisTotal,
+      difference,
+      iwkl_cabang_nominal_formatted: formatNumber(cabangTotal),
+      iwkl_jenis_nominal_formatted: formatNumber(jenisTotal),
+      difference_formatted: formatNumber(difference),
+    }
   );
-
-  const detailGroups = groupDetailRows(options.detailRows, {
-    keySelector: options.detailKeySelector,
-    fields: options.fields.map((field) => field.field),
-  });
-
-  for (const [parentName, detailTotals] of detailGroups.entries()) {
-    const summary = summaryMap.get(parentName);
-
-    if (!summary) {
-      addError(
-        options.errors,
-        options.sheet,
-        `Parent detail "${parentName}" tidak ditemukan di sheet summary.`,
-        {
-          parent_name: parentName,
-        }
-      );
-
-      continue;
-    }
-
-    for (const field of options.fields) {
-      const summaryValue = numberValue(summary[field.field]);
-      const detailValue = numberValue(detailTotals[field.field]);
-      const diff = detailValue - summaryValue;
-      const tolerance = field.tolerance ?? 1;
-
-      if (Math.abs(diff) > tolerance) {
-        addWarning(
-          options.warnings,
-          options.sheet,
-          `Subtotal detail untuk "${parentName}" berbeda dengan nilai summary pada ${field.label}.`,
-          {
-            parent_name: parentName,
-            field: field.field,
-            summary_value: summaryValue,
-            detail_value: detailValue,
-            difference: diff,
-            summary_value_formatted: formatNumber(summaryValue),
-            detail_value_formatted: formatNumber(detailValue),
-            difference_formatted: formatNumber(diff),
-          }
-        );
-      }
-    }
-  }
-}
-
-function getIwkbuSummaryParentName(row: RevenueRow): string {
-  const unitName = normalizeUnitName(row.unit_name);
-
-  if (unitName === "LOKET KANTOR WILAYAH JAWA TIMUR") {
-    return "KANTOR WILAYAH JAWA TIMUR";
-  }
-
-  if (unitName.startsWith("LOKET KANTOR CABANG ")) {
-    return unitName.replace("LOKET ", "");
-  }
-
-  return unitName;
 }
 
 export function validateRevenueBusinessRules(data: {
   swdkllj: RevenueRow[];
-  swdklljDetail: RevenueRow[];
   iwkbu: RevenueRow[];
-  iwkbuDetail: RevenueRow[];
-  iwkl: RevenueRow[];
-  iwklDetail: RevenueRow[];
+  iwklCabang: RevenueRow[];
+  iwklJenis: RevenueRow[];
 }) {
   const errors: Issue[] = [];
   const warnings: Issue[] = [];
 
   checkDuplicateRows(data.swdkllj, {
     sheet: "SWDKLLJ",
-    label: "kantor di summary SWDKLLJ",
-    warnings,
-    keySelector: (row) => normalizeUnitName(row.unit_name),
-  });
-
-  checkDuplicateRows(data.swdklljDetail, {
-    sheet: "SWDKLLJ_Detail",
     label: "kombinasi Kantor Cabang dan Kantor",
     warnings,
     keySelector: (row) =>
@@ -260,13 +145,6 @@ export function validateRevenueBusinessRules(data: {
 
   checkDuplicateRows(data.iwkbu, {
     sheet: "IWKBU",
-    label: "kantor di summary IWKBU",
-    warnings,
-    keySelector: (row) => normalizeUnitName(row.unit_name),
-  });
-
-  checkDuplicateRows(data.iwkbuDetail, {
-    sheet: "IWKBU_Detail",
     label: "kombinasi Kantor Cabang dan Kantor",
     warnings,
     keySelector: (row) =>
@@ -275,61 +153,29 @@ export function validateRevenueBusinessRules(data: {
       )}`,
   });
 
-  checkDuplicateRows(data.iwkl, {
-    sheet: "IWKL",
-    label: "kantor di summary IWKL",
+  checkDuplicateRows(data.iwklCabang, {
+    sheet: "IWKL_Cabang",
+    label: "kantor cabang IWKL",
     warnings,
     keySelector: (row) => normalizeUnitName(row.unit_name),
   });
 
-  checkDuplicateRows(data.iwklDetail, {
-    sheet: "IWKL_Detail",
-    label: "kombinasi Kantor Cabang dan Jenis",
+  checkDuplicateRows(data.iwklJenis, {
+    sheet: "IWKL_Jenis",
+    label: "jenis IWKL",
     warnings,
-    keySelector: (row) =>
-      `${normalizeUnitName(row.parent_unit_name)}|${normalizeUnitName(
-        row.detail_type
-      )}`,
+    keySelector: (row) => normalizeUnitName(row.detail_type),
   });
 
-  compareSubtotalWithSummary({
-    sheet: "SWDKLLJ_Detail",
-    summaryRows: data.swdkllj.filter(
-      (row) => row.level === "CABANG_SUMMARY"
-    ),
-    detailRows: data.swdklljDetail,
-    summaryKeySelector: (row) => normalizeUnitName(row.unit_name),
-    detailKeySelector: (row) => normalizeUnitName(row.parent_unit_name),
-    fields: [
-      { field: "kd", label: "KD" },
-      { field: "sw", label: "SW" },
-      { field: "denda", label: "DENDA" },
-      { field: "setor_adjustment", label: "(+/-) SETOR" },
-      { field: "total", label: "TOTAL" },
-      { field: "transaction_count", label: "Jumlah Transaksi" },
-    ],
-    errors,
+  checkZeroRows(data.swdkllj, {
+    sheet: "SWDKLLJ",
+    fields: ["kd", "sw", "denda", "setor_adjustment", "total"],
     warnings,
+    labelSelector: (row) => `${row.parent_unit_name} - ${row.unit_name}`,
   });
 
-  compareSubtotalWithSummary({
-    sheet: "IWKBU_Detail",
-    summaryRows: data.iwkbu,
-    detailRows: data.iwkbuDetail,
-    summaryKeySelector: getIwkbuSummaryParentName,
-    detailKeySelector: (row) => normalizeUnitName(row.parent_unit_name),
-    fields: [
-      { field: "ask_last_year", label: "ASK Tahun Lalu" },
-      { field: "iwkbu_last_year", label: "IWKBU Tahun Lalu" },
-      { field: "ask_current_year", label: "ASK Tahun Sekarang" },
-      { field: "iwkbu_current_year", label: "IWKBU Tahun Sekarang" },
-    ],
-    errors,
-    warnings,
-  });
-
-  checkZeroRows(data.iwkbuDetail, {
-    sheet: "IWKBU_Detail",
+  checkZeroRows(data.iwkbu, {
+    sheet: "IWKBU",
     fields: [
       "ask_last_year",
       "iwkbu_last_year",
@@ -340,11 +186,24 @@ export function validateRevenueBusinessRules(data: {
     labelSelector: (row) => `${row.parent_unit_name} - ${row.unit_name}`,
   });
 
-  checkZeroRows(data.iwklDetail, {
-    sheet: "IWKL_Detail",
+  checkZeroRows(data.iwklCabang, {
+    sheet: "IWKL_Cabang",
     fields: ["passenger_count", "nominal"],
     warnings,
-    labelSelector: (row) => `${row.parent_unit_name} - ${row.detail_type}`,
+    labelSelector: (row) => String(row.unit_name ?? ""),
+  });
+
+  checkZeroRows(data.iwklJenis, {
+    sheet: "IWKL_Jenis",
+    fields: ["passenger_count", "nominal"],
+    warnings,
+    labelSelector: (row) => String(row.detail_type ?? ""),
+  });
+
+  checkIwklCabangJenisTotal({
+    iwklCabang: data.iwklCabang,
+    iwklJenis: data.iwklJenis,
+    warnings,
   });
 
   return {

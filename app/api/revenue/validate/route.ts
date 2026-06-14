@@ -21,11 +21,9 @@ export async function GET() {
       totals,
       preview: {
         swdkllj: data.swdkllj.slice(0, 3),
-        swdkllj_detail: data.swdklljDetail.slice(0, 3),
         iwkbu: data.iwkbu.slice(0, 3),
-        iwkbu_detail: data.iwkbuDetail.slice(0, 3),
-        iwkl: data.iwkl.slice(0, 3),
-        iwkl_detail: data.iwklDetail.slice(0, 3),
+        iwkl_cabang: data.iwklCabang.slice(0, 3),
+        iwkl_jenis: data.iwklJenis.slice(0, 3),
       },
       errors,
       warnings,

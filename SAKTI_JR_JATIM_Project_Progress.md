@@ -1,6 +1,6 @@
 # SAKTI JR-JATIM Project Progress
 
-Generated: 2026-06-07
+Generated: 2026-06-11
 
 ## 1. Ringkasan Project
 
@@ -14,13 +14,14 @@ Tujuan besar project:
 - Menyediakan import, validasi, sync, dan audit log untuk data pendapatan.
 - Menjadi fondasi untuk modul Pelayanan, Kecelakaan, dan Kegiatan setelah schema/data modul tersebut tersedia.
 
-Status saat ini: fondasi aplikasi, auth, dashboard pendapatan, Master Unit, import pendapatan, peta Leaflet/OpenStreetMap, overview lintas fungsi, panel kegiatan terbaru, dan placeholder modul non-pendapatan sudah terbentuk. Modul Pendapatan adalah modul data paling matang dan sudah memakai data Supabase untuk periode Mei 2026, termasuk semua sumber pendapatan, detail per unit/source, agregasi `month=all`, comparison periode tahun sebelumnya, dan tren historis bulanan dari view revenue jika batch bulanannya tersedia. Modul Pelayanan, Kecelakaan, dan Kegiatan masih memakai data static/placeholder, walau overview sudah dapat menampilkan metrik, Top Unit, tabel, peta, dan link detail sesuai fungsi aktif.
+Status saat ini: fondasi aplikasi, auth, dashboard pendapatan, Master Unit, import pendapatan, peta Leaflet/OpenStreetMap, overview lintas fungsi, panel kegiatan terbaru, dan placeholder modul non-pendapatan sudah terbentuk. Modul Pendapatan adalah modul data paling matang dan sudah disesuaikan ke skema source V2: `SWDKLLJ`, `IWKBU`, `IWKL_Cabang`, dan `IWKL_Jenis`. Dashboard bisnis tetap memakai tab `SWDKLLJ`, `IWKBU`, dan `IWKL`, dengan total IWKL bersumber dari cabang dan komposisi jenis/operator bersumber dari breakdown seluruh Kanwil. Modul Pelayanan, Kecelakaan, dan Kegiatan masih memakai data static/placeholder, walau overview sudah dapat menampilkan metrik, Top Unit, tabel, peta, dan link detail sesuai fungsi aktif.
 
-Catatan audit lokal 2026-06-07:
+Catatan audit lokal 2026-06-11:
 
 - Dokumen ini diperbarui berdasarkan kondisi working tree saat ini, bukan hanya commit terakhir.
-- Working tree belum bersih. Ada file modified dan untracked pada area `app/`, `components/`, `lib/`, `public/images/`, serta dokumen progress ini.
-- Verifikasi lokal belum hijau: `npm run lint` gagal di `app/page.tsx:575`, dan `npm run build` gagal pada type-check file generated `.next/dev/types/validator.ts`.
+- Working tree belum bersih. Ada file modified pada area `app/`, `components/`, `lib/`, `supabase/migrations/`, serta dokumen progress ini.
+- Perubahan terakhir memfokuskan Pendapatan pada skema source V2 dan merapikan `supabase/migrations` menjadi baseline fresh setup.
+- Verifikasi lokal 2026-06-11 sudah hijau: `npm run lint` dan `npm run build` berhasil.
 
 ## 2. Stack Teknologi
 
@@ -87,9 +88,6 @@ root/
 
 supabase/migrations/
   202605310001_master_units.sql
-  202605310002_master_unit_dishub_dllaj.sql
-  202605310003_backfill_dishub_dllaj_unit_types.sql
-  202605310004_deactivate_iwkl_detail_source_units.sql
   202605310005_revenue_base_schema.sql
 
 docs/
@@ -260,7 +258,7 @@ Fungsi utama:
   - Tab Semua menampilkan komposisi SWDKLLJ/IWKBU/IWKL.
   - Tab SWDKLLJ menampilkan breakdown KD, SW, Denda, dan Setor Adjustment.
   - Tab IWKBU menampilkan perbandingan periode sebelumnya vs saat ini.
-  - Tab IWKL menampilkan komposisi operator/jenis dari IWKL Detail.
+  - Tab IWKL menampilkan overview IWKL per cabang dan komposisi jenis/operator seluruh Kanwil.
 - Tabel bawah dinamis sesuai state aktif.
 - Drilldown pendapatan:
   - `Unit = All + Tab = Semua`: dashboard utama semua sumber dan semua unit.
@@ -277,7 +275,9 @@ Catatan data Pendapatan:
 - Total Pendapatan = SWDKLLJ + IWKBU periode saat ini (`IWKBU.1`) + IWKL.
 - IWKBU summary/detail dinormalisasi agar prefix `LOKET ` tidak memecah unit gabungan.
 - Kontribusi dihitung terhadap total pembanding sesuai state aktif.
-- Detail IWKL route sekarang bisa mengembalikan agregasi detail operator/jenis untuk overview IWKL semua unit.
+- Total IWKL memakai `IWKL_Cabang` sebagai sumber resmi.
+- `IWKL_Jenis` hanya dipakai untuk breakdown jenis/operator seluruh Kanwil, bukan drilldown jenis per cabang.
+- SWDKLLJ dan IWKBU memakai data detail-level lalu membuat parent summary sintetis dari agregasi `parent_unit_name`.
 - Nilai KPI, tabel, ranking, dan komposisi memakai data Supabase.
 - Tren bulanan Pendapatan di halaman ini memakai `trend` dan `unit_trends` dari API overview.
 - Chart unit/source mengambil nilai SWDKLLJ/IWKBU/IWKL dari baris tren yang sama, sehingga tren detail tidak lagi memakai helper mock jika batch historis bulanannya tersedia.
@@ -292,7 +292,7 @@ Endpoint dashboard pendapatan:
 | `GET /api/dashboard/revenue/map` | Data marker peta dari Master Unit dan revenue |
 | `GET /api/dashboard/revenue/swdkllj` | Data SWDKLLJ summary/detail |
 | `GET /api/dashboard/revenue/iwkbu` | Data IWKBU summary/detail |
-| `GET /api/dashboard/revenue/iwkl` | Data IWKL summary/detail dan agregasi detail operator/jenis saat parent kosong |
+| `GET /api/dashboard/revenue/iwkl` | Data IWKL per cabang dan breakdown jenis/operator seluruh Kanwil |
 
 ## 9. Import Pendapatan
 
@@ -320,12 +320,19 @@ Sheet yang dibaca:
 
 | Sheet | Range | Tujuan |
 | --- | --- | --- |
-| `SWDKLLJ` | `A:G` | Summary SWDKLLJ |
-| `SWDKLLJ_Detail` | `A:H` | Detail SWDKLLJ per parent |
-| `IWKBU` | `A:G` | Summary IWKBU |
-| `IWKBU_Detail` | `A:H` | Detail IWKBU per parent |
-| `IWKL` | `A:C` | Summary IWKL |
-| `IWKL_Detail` | `A:D` | Detail IWKL per jenis/operator |
+| `SWDKLLJ` | `A:H` | Detail SWDKLLJ per unit di bawah cabang/kanwil |
+| `IWKBU` | `A:H` | Detail IWKBU per unit di bawah cabang/kanwil |
+| `IWKL_Cabang` | `A:C` | Total IWKL per cabang/kanwil |
+| `IWKL_Jenis` | `A:C` | Breakdown jenis/operator IWKL seluruh Kanwil |
+
+Header yang diharapkan:
+
+| Sheet | Header |
+| --- | --- |
+| `SWDKLLJ` | `Kantor Cabang`, `Kantor`, `KD`, `SW`, `DENDA`, `(+/-) SETOR`, `TOTAL`, `Jumlah Transaksi` |
+| `IWKBU` | `Kantor Cabang`, `Kantor`, `ASK`, `IWKBU`, `ASK`, `IWKBU`, `ASK`, `IWKBU` |
+| `IWKL_Cabang` | `Kantor`, `Penumpang`, `Nominal` |
+| `IWKL_Jenis` | `Jenis`, `Penumpang`, `Nominal` |
 
 Parser:
 
@@ -334,6 +341,7 @@ Parser:
 - Parser jumlah mendukung format Indonesia.
 - Parser persen mendukung koma desimal.
 - Hardcoded alias Mojokerto/Mojekerto masih dipertahankan sebagai fallback.
+- Parser lama untuk `SWDKLLJ_Detail`, `IWKBU_Detail`, dan `IWKL_Detail` sudah dihapus.
 
 Validasi:
 
@@ -341,8 +349,10 @@ Validasi:
 - Required field utama dicek.
 - Duplikasi data diberi warning.
 - Row bernilai nol diberi warning.
-- Subtotal detail dibandingkan dengan summary.
+- Validasi subtotal detail vs summary lama sudah dihapus karena tabel general tidak lagi dipakai.
+- Ada warning jika total nominal `IWKL_Cabang` berbeda dari total nominal `IWKL_Jenis`.
 - Unit yang belum masuk Master Unit menjadi warning, bukan blocker.
+- Master Unit resolution hanya berlaku untuk parent/unit nyata; `IWKL_Jenis.detail_type` tidak dianggap Master Unit.
 
 Sync:
 
@@ -352,8 +362,8 @@ Sync:
   - `revenue_import_batches`
   - `revenue_swdkllj`
   - `revenue_iwkbu`
-  - `revenue_iwkl`
-  - `revenue_iwkl_details`
+  - `revenue_iwkl_cabang`
+  - `revenue_iwkl_jenis`
   - `revenue_sync_logs`
 
 ## 10. Master Unit
@@ -414,7 +424,8 @@ Seed dari revenue:
 - `DISHUB` dan `DLLAJ` otomatis dikenali.
 - `CABANG` dan `KANTOR_PELAYANAN` tanpa parent diarahkan ke `KANTOR WILAYAH JAWA TIMUR` jika unit Kanwil tersedia.
 - Seed juga memperbarui `parent_unit_id` untuk kandidat existing yang parent-nya masih kosong jika parent dapat ditemukan.
-- Sumber IWKL Detail seperti operator/jenis tidak lagi dianggap master unit aktif; migration deactivation tersedia.
+- `IWKL_Cabang` dipakai sebagai sumber unit IWKL.
+- `IWKL_Jenis` tidak dipakai sebagai sumber Master Unit karena berisi jenis/operator seluruh Kanwil, bukan unit organisasi.
 
 Resolver Master Unit di pipeline revenue:
 
@@ -422,6 +433,7 @@ Resolver Master Unit di pipeline revenue:
 - Mengganti `unit_name` dan `parent_unit_name` ke `master_units.canonical_name` jika alias ditemukan.
 - Jika tidak ditemukan, menambah warning `Unit belum terpetakan di Master Unit`.
 - Sync tetap lanjut walau ada unit belum terpetakan.
+- Resolver berlaku untuk `SWDKLLJ`, `IWKBU`, dan `IWKL_Cabang`; `IWKL_Jenis.detail_type` dilewati dari resolusi unit.
 
 ## 11. Modul Pelayanan, Kecelakaan, dan Kegiatan
 
@@ -461,7 +473,7 @@ Yang belum ada:
 
 ## 12. Database dan Migration
 
-Migration yang sudah ditrack lokal:
+Migration yang ditrack lokal sekarang dirapikan sebagai baseline fresh setup:
 
 1. `202605310001_master_units.sql`
    - Extension `pgcrypto`.
@@ -472,41 +484,39 @@ Migration yang sudah ditrack lokal:
    - Trigger `updated_at`.
    - RLS enabled.
 
-2. `202605310002_master_unit_dishub_dllaj.sql`
-   - Tambah enum `DISHUB`.
-   - Tambah enum `DLLAJ`.
-   - Backfill default parent Cabang/Pelayanan ke Kanwil.
-
-3. `202605310003_backfill_dishub_dllaj_unit_types.sql`
-   - Backfill unit `LAINNYA` yang mengandung DISHUB/DLLAJ menjadi tipe terkait.
-
-4. `202605310004_deactivate_iwkl_detail_source_units.sql`
-   - Menonaktifkan unit bertipe `OPERATOR` yang berasal dari sumber/jenis IWKL Detail.
-   - Sudah dibuat defensif jika tabel revenue belum tersedia saat migration berjalan.
-
-5. `202605310005_revenue_base_schema.sql`
+2. `202605310005_revenue_base_schema.sql`
    - Tabel `profiles` untuk role user.
    - Trigger auto-create profile saat user Supabase Auth dibuat.
-   - Tabel revenue base:
+   - Tabel revenue source V2:
      - `revenue_import_batches`
      - `revenue_swdkllj`
      - `revenue_iwkbu`
-     - `revenue_iwkl`
-     - `revenue_iwkl_details`
+     - `revenue_iwkl_cabang`
+     - `revenue_iwkl_jenis`
      - `revenue_sync_logs`
    - View dashboard revenue:
-  - `v_revenue_latest_batch`
-  - `v_revenue_overview_monthly`
-  - `v_revenue_source_composition`
-  - `v_revenue_by_unit_monthly`
-  - `v_revenue_swdkllj_monthly`
-  - `v_revenue_iwkbu_monthly`
-  - `v_revenue_iwkl_monthly`
-  - `v_revenue_iwkl_detail_monthly`
+     - `v_revenue_latest_batch`
+     - `v_revenue_overview_monthly`
+     - `v_revenue_source_composition`
+     - `v_revenue_by_unit_monthly`
+     - `v_revenue_swdkllj_monthly`
+     - `v_revenue_iwkbu_monthly`
+     - `v_revenue_iwkl_cabang_monthly`
+     - `v_revenue_iwkl_jenis_monthly`
    - Index utama untuk batch, periode, unit, parent, dan sync logs.
    - RLS enabled untuk tabel revenue.
+   - View SWDKLLJ/IWKBU membuat `PARENT_SUMMARY` sintetis dari agregasi `parent_unit_name`.
+   - Total IWKL di overview, komposisi sumber, dan by-unit memakai `revenue_iwkl_cabang`.
+   - Breakdown jenis/operator IWKL memakai `revenue_iwkl_jenis`.
 
-Implikasi: schema utama Pendapatan dan Master Unit sekarang sudah ditrack di migration lokal. Tetap perlu smoke test di Supabase project fresh untuk memastikan bootstrap dari nol berjalan sesuai ekspektasi.
+Migration patch historis yang sudah tidak diperlukan untuk fresh setup telah dihapus:
+
+- `202605310002_master_unit_dishub_dllaj.sql`
+- `202605310003_backfill_dishub_dllaj_unit_types.sql`
+- `202605310004_deactivate_iwkl_detail_source_units.sql`
+- `202606090001_revenue_source_schema_v2.sql`
+
+Implikasi: schema utama Pendapatan dan Master Unit sekarang sudah ditrack sebagai baseline bersih. Ini cocok untuk database baru atau migration reset. Jika Supabase project lama sudah pernah menjalankan migration historis yang dihapus, migration history/database perlu diselaraskan atau di-reset sebelum memakai susunan migration ini.
 
 ## 13. UI dan Design System
 
@@ -569,7 +579,7 @@ Fondasi aplikasi:
 Pendapatan:
 
 - Google Sheets reader.
-- Parser 6 sheet pendapatan.
+- Parser 4 sheet pendapatan V2 (`SWDKLLJ`, `IWKBU`, `IWKL_Cabang`, `IWKL_Jenis`).
 - Business validator.
 - API validasi.
 - API sync.
@@ -582,7 +592,10 @@ Pendapatan:
 - Overview source All untuk SWDKLLJ/IWKBU/IWKL.
 - Detail Unit gabungan.
 - Detail Source per unit untuk SWDKLLJ/IWKBU/IWKL.
+- SWDKLLJ/IWKBU memakai detail-level rows dan parent summary sintetis.
+- IWKL memakai cabang sebagai total utama dan jenis/operator sebagai breakdown seluruh Kanwil.
 - KPI cards dinamis untuk kombinasi Unit + Tab.
+- Format angka Rupiah compact kini menampilkan dua digit desimal agar nilai seperti sekitar 6 miliar tampil lebih informatif (`6,xxM`).
 - Line/area chart tren memakai data `trend` dan `unit_trends` dari API overview.
 - Panel komposisi/ringkasan dinamis untuk kombinasi Unit + Tab.
 - Tabel bawah dinamis untuk kombinasi Unit + Tab.
@@ -591,7 +604,7 @@ Pendapatan:
 - Unit ranking API.
 - Map API.
 - Support `month=all` untuk overview/unit/map.
-- Migration revenue/base lengkap untuk tabel dan view yang dipakai dashboard.
+- Migration revenue/base sudah menjadi baseline V2 untuk tabel dan view yang dipakai dashboard.
 
 Master Unit:
 
@@ -605,7 +618,7 @@ Master Unit:
 - Warning unit belum terpetakan, sync tetap lanjut.
 - DISHUB/DLLAJ support.
 - Parent default ke Kanwil.
-- Deactivation sumber IWKL Detail/OPERATOR.
+- `IWKL_Jenis` tidak lagi diperlakukan sebagai sumber Master Unit.
 - Leaflet map picker koordinat.
 
 Overview:
@@ -648,10 +661,10 @@ Prioritas besar yang belum selesai:
 - Activity feed real.
 - Foto/thumbnail kegiatan/unit real untuk peta dan card kegiatan.
 - Lengkapi batch historis Pendapatan lintas bulan agar tren YtD/unit/source utuh untuk semua tahun.
+- Terapkan atau reset migration Supabase sesuai baseline fresh setup yang baru.
 - Uji migration lengkap di Supabase project fresh.
+- Validasi dan sync spreadsheet pendapatan V2 dengan 4 sheet baru.
 - RLS policies detail untuk tabel Master Unit dan revenue jika perlu akses client langsung.
-- Perbaiki hasil `npm run lint` yang gagal di `app/page.tsx:575`.
-- Investigasi hasil `npm run build` yang gagal type-check pada generated `.next/dev/types/validator.ts`.
 
 Detail polish yang masih bisa dirapikan setelah fungsi utama selesai:
 
@@ -674,8 +687,9 @@ Detail polish yang masih bisa dirapikan setelah fungsi utama selesai:
    - Credential yang pernah terekspos harus dirotasi sebelum production.
 
 2. Migration perlu diuji fresh
-   - Migration lokal sudah mencakup Master Unit dan revenue/base.
-   - Perlu diuji di Supabase project fresh karena sebagian schema sebelumnya berasal dari database yang sudah ada.
+   - Migration lokal sudah dirapikan menjadi baseline Master Unit dan revenue/source V2.
+   - Perlu diuji di Supabase project fresh untuk memastikan bootstrap dari nol berjalan sesuai ekspektasi.
+   - Untuk Supabase project lama yang sudah punya migration history, perlu reset/penyelarasan sebelum susunan migration yang baru dipakai.
 
 3. Static data lintas fungsi
    - KPI Pelayanan/Kecelakaan/Kegiatan, trend non-pendapatan, peta non-pendapatan, dan latest activities masih static/placeholder.
@@ -697,34 +711,34 @@ Detail polish yang masih bisa dirapikan setelah fungsi utama selesai:
    - Supabase service role hanya digunakan di server route/helper.
    - Jangan import service role helper ke client component.
 
-8. Verifikasi lokal belum hijau
-   - `npm run lint` gagal pada rule `react-hooks/set-state-in-effect` di `app/page.tsx:575`.
-   - `npm run build` compile sukses, tetapi type-check gagal pada generated `.next/dev/types/validator.ts`.
-   - Perlu investigasi apakah file generated `.next/dev` stale/malformed atau ada konfigurasi include TypeScript yang harus dirapikan.
+8. Verifikasi setelah perubahan app Pendapatan
+   - `npm run lint` dan `npm run build` sudah berhasil setelah penyesuaian parser/API/dashboard Pendapatan.
+   - Perubahan terakhir pada migration SQL tetap perlu diuji langsung melalui workflow Supabase reset/push atau project fresh.
 
 ## 18. Rekomendasi Next Steps
 
 Urutan kerja yang paling masuk akal setelah progress saat ini:
 
-1. Perbaiki lint `app/page.tsx:575`.
-2. Investigasi build/type-check generated `.next/dev/types/validator.ts`, lalu jalankan ulang build bersih.
-3. Lengkapi batch historis Pendapatan per bulan agar tren global/unit/source utuh.
-4. Finalisasi data model Pelayanan, Kecelakaan, dan Kegiatan.
-5. Buat migration schema untuk tiga modul tersebut.
-6. Buat import pipeline per modul:
+1. Terapkan/reset migration Supabase sesuai baseline fresh setup terbaru.
+2. Validasi spreadsheet pendapatan V2, pastikan 4 sheet terbaca dan warning bisnis sesuai.
+3. Sync satu periode baru, lalu cek batch, log, dashboard overview, dashboard pendapatan, drilldown SWDKLLJ/IWKBU, serta IWKL cabang/jenis.
+4. Lengkapi batch historis Pendapatan per bulan agar tren global/unit/source utuh.
+5. Finalisasi data model Pelayanan, Kecelakaan, dan Kegiatan.
+6. Buat migration schema untuk tiga modul tersebut.
+7. Buat import pipeline per modul:
    - reader,
    - parser,
    - validator,
    - sync,
    - sync log.
-7. Ganti static KPI/trend/activities di Overview dengan data real.
-8. Bangun dashboard detail `/pelayanan`, `/kecelakaan`, dan `/kegiatan`.
-9. Tambahkan foto/asset kegiatan atau unit untuk popup peta dan activity cards.
-10. Putuskan apakah utility Generate/Refresh Master Unit perlu ditampilkan kembali.
-11. Jalankan migration lengkap di Supabase project fresh sebagai bootstrap test.
-12. Jalankan full smoke test role admin/viewer.
-13. Rapikan UI detail kecil.
-14. Siapkan deploy production.
+8. Ganti static KPI/trend/activities di Overview dengan data real.
+9. Bangun dashboard detail `/pelayanan`, `/kecelakaan`, dan `/kegiatan`.
+10. Tambahkan foto/asset kegiatan atau unit untuk popup peta dan activity cards.
+11. Putuskan apakah utility Generate/Refresh Master Unit perlu ditampilkan kembali.
+12. Jalankan migration lengkap di Supabase project fresh sebagai bootstrap test.
+13. Jalankan full smoke test role admin/viewer.
+14. Rapikan UI detail kecil.
+15. Siapkan deploy production.
 
 ## 19. Perintah Verifikasi
 
@@ -735,14 +749,11 @@ npm run lint
 npm run build
 ```
 
-Hasil audit lokal 2026-06-07:
+Hasil verifikasi lokal 2026-06-11:
 
-- `npm run lint` gagal dengan 1 error:
-  - `app/page.tsx:575` terkena rule `react-hooks/set-state-in-effect` karena `setSelectedMapUnitId(null)` dipanggil langsung di dalam effect.
-- `npm run build` gagal pada tahap type-check:
-  - Next.js compile sukses.
-  - Type-check gagal di `.next/dev/types/validator.ts:170`.
-  - File generated tersebut terlihat malformed di sekitar validasi route `/api/dashboard/revenue/iwkl`.
+- `npm run lint` berhasil.
+- `npm run build` berhasil.
+- Setelah perubahan terakhir pada SQL migration, perlu smoke test Supabase langsung melalui database fresh/reset karena verifikasi aplikasi tidak menjalankan SQL migration.
 
 Smoke test manual:
 
@@ -758,8 +769,10 @@ Smoke test manual:
    - Klik Lihat Detail unit, klik source card, klik tab Semua, lalu Bersihkan Unit.
 6. Buka `/admin/master-unit`, edit unit, koordinat, parent, alias.
 7. Buka `/admin/import-pendapatan`, validasi, sync, dan cek audit log.
-8. Login sebagai `VIEWER`, pastikan menu admin hilang dan `/admin/*` tidak bisa diakses.
+8. Pastikan validasi import membaca 4 sheet baru: `SWDKLLJ`, `IWKBU`, `IWKL_Cabang`, dan `IWKL_Jenis`.
+9. Pastikan tab IWKL menampilkan overview per cabang dan komposisi jenis/operator seluruh Kanwil.
+10. Login sebagai `VIEWER`, pastikan menu admin hilang dan `/admin/*` tidak bisa diakses.
 
 ## 20. Kesimpulan Status
 
-Project sudah melewati fase fondasi dan dashboard pendapatan utama. Bagian yang paling matang saat ini adalah Pendapatan dan Master Unit. Dashboard Pendapatan sudah mendukung level All, overview per source, Detail Unit, dan Detail Source per unit dengan KPI, chart, komposisi/ringkasan, ranking, tabel, dan tren bulanan yang mengikuti state aktif selama batch historis tersedia. Overview sudah lebih kuat sebagai dashboard lintas fungsi karena unit filter, sticky tabs, Top Unit, tabel, peta, popup, dan link detail sudah menyesuaikan fungsi aktif. Namun data Pelayanan, Kecelakaan, Kegiatan, dan activity feed masih static/placeholder. Tahap berikutnya sebaiknya dimulai dari membuat lint/build kembali hijau, lalu melengkapi batch historis Pendapatan dan merealisasikan data model/import pipeline untuk Pelayanan, Kecelakaan, dan Kegiatan agar seluruh overview dan halaman detail sepenuhnya berbasis data real.
+Project sudah melewati fase fondasi dan dashboard pendapatan utama. Bagian yang paling matang saat ini adalah Pendapatan dan Master Unit. Dashboard Pendapatan sudah mendukung level All, overview per source, Detail Unit, dan Detail Source per unit dengan KPI, chart, komposisi/ringkasan, ranking, tabel, dan tren bulanan yang mengikuti state aktif selama batch historis tersedia. Pipeline Pendapatan juga sudah menyesuaikan skema source V2: SWDKLLJ/IWKBU dari detail-level unit, IWKL total dari cabang, dan IWKL jenis/operator sebagai breakdown seluruh Kanwil. Overview sudah lebih kuat sebagai dashboard lintas fungsi karena unit filter, sticky tabs, Top Unit, tabel, peta, popup, dan link detail sudah menyesuaikan fungsi aktif. Namun data Pelayanan, Kecelakaan, Kegiatan, dan activity feed masih static/placeholder. Tahap berikutnya sebaiknya dimulai dari menjalankan/reset migration Supabase dan smoke test spreadsheet V2, lalu melengkapi batch historis Pendapatan dan merealisasikan data model/import pipeline untuk Pelayanan, Kecelakaan, dan Kegiatan agar seluruh overview dan halaman detail sepenuhnya berbasis data real.
